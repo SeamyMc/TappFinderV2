@@ -90,7 +90,7 @@ def api_geocode(request):
 @require_GET
 def api_beers(request):
     q = request.GET.get('q', '').strip()
-    beers = Beer.objects.filter(name__icontains=q).values('name', 'image_url')[:20]
+    beers = Beer.objects.filter(name__icontains=q).values('id', 'name', 'image_url')[:20]
     return JsonResponse({'beers': list(beers)})
 
 
@@ -141,6 +141,177 @@ def api_beer_results(request):
         })
 
     return JsonResponse({'pubs': pubs, 'beer': beer.name, 'image_url': beer.image_url, 'found': True})
+
+
+def pub_profile(request, pub_id):
+    pub = get_object_or_404(Pub, id=pub_id)
+
+    overall = PintLog.objects.filter(pub=pub).aggregate(
+        total_logs=Count('id'),
+        avg_price=Avg('price'),
+        min_price=Min('price'),
+    )
+
+    beer_aggregates = (
+        PintLog.objects
+        .filter(pub=pub)
+        .values('beer__id', 'beer__name', 'beer__image_url')
+        .annotate(avg_price=Avg('price'), min_price=Min('price'), log_count=Count('id'))
+        .order_by('avg_price')
+    )
+
+    beers = []
+    for b in beer_aggregates:
+        recent_logs = (
+            PintLog.objects
+            .filter(pub=pub, beer_id=b['beer__id'])
+            .select_related('user')
+            .order_by('price')[:3]
+        )
+        beers.append({
+            'id': b['beer__id'],
+            'name': b['beer__name'],
+            'image_url': b['beer__image_url'] or '',
+            'avg_price': round(float(b['avg_price']), 2),
+            'min_price': round(float(b['min_price']), 2),
+            'log_count': b['log_count'],
+            'logs': [
+                {
+                    'price': str(log.price),
+                    'serving_size': log.get_serving_size_display(),
+                    'user': log.user.username,
+                    'logged_at': log.logged_at.strftime('%d %b %Y'),
+                }
+                for log in recent_logs
+            ],
+        })
+
+    context = {
+        'pub': pub,
+        'beers': beers,
+        'total_logs': overall['total_logs'] or 0,
+        'avg_price': round(float(overall['avg_price']), 2) if overall['avg_price'] else None,
+        'min_price': round(float(overall['min_price']), 2) if overall['min_price'] else None,
+        'beer_count': len(beers),
+    }
+    return render(request, 'pints/pub_profile.html', context)
+
+
+def beer_profile(request, beer_id):
+    beer = get_object_or_404(Beer, id=beer_id)
+
+    overall = PintLog.objects.filter(beer=beer).aggregate(
+        total_logs=Count('id'),
+        avg_price=Avg('price'),
+        min_price=Min('price'),
+    )
+
+    pub_aggregates = (
+        PintLog.objects
+        .filter(beer=beer)
+        .values('pub__id', 'pub__name', 'pub__address', 'pub__latitude', 'pub__longitude')
+        .annotate(avg_price=Avg('price'), min_price=Min('price'), log_count=Count('id'))
+        .order_by('avg_price')
+    )
+
+    pubs = []
+    for p in pub_aggregates:
+        recent_logs = (
+            PintLog.objects
+            .filter(beer=beer, pub_id=p['pub__id'])
+            .select_related('user')
+            .order_by('price')[:3]
+        )
+        pubs.append({
+            'id': p['pub__id'],
+            'name': p['pub__name'],
+            'address': p['pub__address'] or '',
+            'lat': float(p['pub__latitude']),
+            'lng': float(p['pub__longitude']),
+            'avg_price': round(float(p['avg_price']), 2),
+            'min_price': round(float(p['min_price']), 2),
+            'log_count': p['log_count'],
+            'logs': [
+                {
+                    'price': str(log.price),
+                    'serving_size': log.get_serving_size_display(),
+                    'user': log.user.username,
+                    'logged_at': log.logged_at.strftime('%d %b %Y'),
+                }
+                for log in recent_logs
+            ],
+        })
+
+    context = {
+        'beer': beer,
+        'pubs': pubs,
+        'total_logs': overall['total_logs'] or 0,
+        'avg_price': round(float(overall['avg_price']), 2) if overall['avg_price'] else None,
+        'min_price': round(float(overall['min_price']), 2) if overall['min_price'] else None,
+        'pub_count': len(pubs),
+    }
+    return render(request, 'pints/beer_profile.html', context)
+
+
+@require_GET
+def api_pub_autocomplete(request):
+    q = request.GET.get('q', '').strip()
+    pubs = Pub.objects.filter(name__icontains=q).order_by('name')[:15]
+    return JsonResponse({'pubs': [{'id': p.id, 'name': p.name, 'address': p.address} for p in pubs]})
+
+
+@require_GET
+def api_pub_results(request):
+    pub_id = request.GET.get('pub_id', '').strip()
+    if not pub_id:
+        return JsonResponse({'found': False})
+    pub = get_object_or_404(Pub, id=pub_id)
+
+    beer_aggregates = (
+        PintLog.objects
+        .filter(pub=pub)
+        .values('beer__id', 'beer__name', 'beer__image_url')
+        .annotate(avg_price=Avg('price'), min_price=Min('price'), log_count=Count('id'))
+        .order_by('avg_price')
+    )
+
+    beers = []
+    for b in beer_aggregates:
+        recent_logs = (
+            PintLog.objects
+            .filter(pub=pub, beer_id=b['beer__id'])
+            .select_related('user')
+            .order_by('price')[:3]
+        )
+        beers.append({
+            'name': b['beer__name'],
+            'image_url': b['beer__image_url'] or '',
+            'avg_price': round(float(b['avg_price']), 2),
+            'min_price': round(float(b['min_price']), 2),
+            'log_count': b['log_count'],
+            'logs': [
+                {
+                    'price': str(log.price),
+                    'serving_size': log.get_serving_size_display(),
+                    'user': log.user.username,
+                    'logged_at': log.logged_at.strftime('%d %b %Y'),
+                }
+                for log in recent_logs
+            ],
+        })
+
+    return JsonResponse({
+        'found': True,
+        'pub': {
+            'id': pub.id,
+            'name': pub.name,
+            'address': pub.address,
+            'lat': float(pub.latitude),
+            'lng': float(pub.longitude),
+        },
+        'beers': beers,
+        'total_logs': sum(b['log_count'] for b in beers),
+    })
 
 
 @login_required

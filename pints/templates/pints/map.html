@@ -3,14 +3,31 @@
 {% block title %}Map — TappFinder{% endblock %}
 
 {% block extra_styles %}
+/* ── Column layout ── */
+.content-col {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
 #map-container {
     position: relative;
-    height: 500px;
-    transition: height 0.3s ease;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 #map-container.expanded {
-    height: calc(100vh - 56px);
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
+    aspect-ratio: unset;
+    border-radius: 0;
+    z-index: 50;
 }
 
 #map {
@@ -380,36 +397,38 @@
 {% endblock %}
 
 {% block content %}
+<div class="content-col">
 <div id="map-container">
     <div id="map"></div>
-</div>
 
-<!-- Toolbar -->
-<div class="map-toolbar">
-    <div class="toolbar-left">
-        <div style="display:flex; gap:8px; align-items:center;">
-            <button class="map-btn" id="add-pub-btn">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Add pub
+    <!-- Toolbar -->
+    <div class="map-toolbar">
+        <div class="toolbar-left">
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button class="map-btn" id="add-pub-btn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add pub
+                </button>
+            </div>
+            <div class="search-box" id="search-box">
+                <input class="search-input" id="pub-search" type="text" placeholder="Search for a pub or address…" autocomplete="off">
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+
+        <div class="toolbar-right">
+            <button class="map-btn-icon" id="expand-btn" title="Expand map">
+                <svg id="expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </button>
+            <button class="map-btn-icon" id="locate-btn" title="Find my location">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/></svg>
             </button>
         </div>
-        <div class="search-box" id="search-box">
-            <input class="search-input" id="pub-search" type="text" placeholder="Search for a pub or address…" autocomplete="off">
-            <div class="search-results" id="search-results"></div>
-        </div>
     </div>
 
-    <div class="toolbar-right">
-        <button class="map-btn-icon" id="expand-btn" title="Expand map">
-            <svg id="expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-        </button>
-        <button class="map-btn-icon" id="locate-btn" title="Find my location">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/></svg>
-        </button>
-    </div>
+    <div class="mode-banner" id="mode-banner">Click the map to place the pub, or search above</div>
 </div>
-
-<div class="mode-banner" id="mode-banner">Click the map to place the pub, or search above</div>
+</div>
 
 <!-- Log pint modal -->
 <div class="modal-overlay" id="log-modal">
@@ -508,19 +527,37 @@ function initMap() {
 }
 
 // ── Custom markers ────────────────────────────────────────────────────────────
-function pubIcon() {
+function pubIcon(avg_price) {
+    // No logs yet — "?" badge
+    const label = avg_price != null ? `£${avg_price.toFixed(2)}` : '?';
     return L.divIcon({
         className: '',
-        html: `<div style="
-            width:32px; height:32px;
-            background:linear-gradient(135deg,#ea9b00,#c47200);
-            border-radius:50% 50% 50% 0;
-            transform:rotate(-45deg);
-            border:2px solid #1a1008;
-            box-shadow:0 2px 8px rgba(0,0,0,0.5);
-        "></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
+        html: `<div style="position:relative;display:inline-block;">
+            <div style="
+                background:#18130a;
+                border:1.5px solid rgba(234,155,0,0.6);
+                border-radius:10px;
+                padding:3px 7px;
+                font-size:0.72rem;
+                font-weight:700;
+                color:#ea9b00;
+                font-family:Inter,system-ui,sans-serif;
+                white-space:nowrap;
+                box-shadow:0 2px 8px rgba(0,0,0,0.6);
+                line-height:1.3;
+            ">${label}</div>
+            <div style="
+                position:absolute;
+                bottom:-5px; left:50%;
+                transform:translateX(-50%);
+                width:0; height:0;
+                border-left:5px solid transparent;
+                border-right:5px solid transparent;
+                border-top:6px solid rgba(234,155,0,0.6);
+            "></div>
+        </div>`,
+        iconSize: null,
+        iconAnchor: [22, 31],
         popupAnchor: [0, -34],
     });
 }
@@ -552,7 +589,7 @@ async function loadPubs() {
 function addPubToMap(feature) {
     const { id, name, log_count, avg_price } = feature.properties;
     const [lng, lat] = feature.geometry.coordinates;
-    const marker = L.marker([lat, lng], { icon: pubIcon() }).addTo(map);
+    const marker = L.marker([lat, lng], { icon: pubIcon(avg_price) }).addTo(map);
 
     marker.on('click', () => openPubPopup(marker, id, name, log_count, avg_price));
 }
@@ -564,7 +601,7 @@ function openPubPopup(marker, id, name, log_count, avg_price) {
     const content = document.createElement('div');
     content.className = 'popup-inner';
     content.innerHTML = `
-        <div class="popup-name">${esc(name)}</div>
+        <div class="popup-name"><a href="/pubs/${id}/" style="color:#f0e8d4;text-decoration:none;">${esc(name)}</a></div>
         <div class="popup-stats">
             <div class="popup-stat"><span>${priceStr}</span> avg pint</div>
             <div class="popup-stat"><span>${logStr}</span></div>
@@ -872,7 +909,7 @@ expandBtn.addEventListener('click', () => {
     mapContainer.classList.toggle('expanded', expanded);
     expandBtn.innerHTML = expanded ? collapseIcon : expandIcon;
     expandBtn.title = expanded ? 'Collapse map' : 'Expand map';
-    setTimeout(() => map.invalidateSize(), 310);
+    setTimeout(() => map.invalidateSize(), 50);
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────

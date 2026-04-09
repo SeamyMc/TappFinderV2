@@ -41,6 +41,7 @@ class PintLog(models.Model):
     serving_size = models.CharField(max_length=10, choices=SERVING_SIZES, default='pint')
     notes = models.TextField(blank=True)
     logged_at = models.DateTimeField(auto_now_add=True)
+    is_seeded = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         ordering = ['-logged_at']

@@ -16,13 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
+from pints import views as pints_views
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
+    path('profile/avatar/', views.upload_avatar, name='upload_avatar'),
     path('search/', views.search, name='search'),
+    path('feed/', views.feed, name='feed'),
+    path('beers/<int:beer_id>/', pints_views.beer_profile, name='beer_profile'),
+    path('pubs/<int:pub_id>/', pints_views.pub_profile, name='pub_profile'),
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('map/', include('pints.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -29,16 +29,46 @@
 .search-hero p {
     font-size: 0.9rem;
     color: #6b5c3e;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
+/* ── Mode toggle ── */
+.mode-toggle {
+    display: inline-flex;
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.15);
+    border-radius: 9px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+}
+
+.mode-btn {
+    padding: 6px 22px;
+    font-size: 0.83rem;
+    font-weight: 500;
+    font-family: inherit;
+    background: transparent;
+    border: none;
+    color: #6b5c3e;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mode-btn.active {
+    background: rgba(234,155,0,0.18);
+    color: #ea9b00;
+}
+
+/* ── Search input ── */
 .search-wrap {
     position: relative;
 }
 
 .search-input-row {
     display: flex;
-    gap: 0;
     background: #0e0b05;
     border: 1px solid rgba(234,155,0,0.2);
     border-radius: 10px;
@@ -79,7 +109,7 @@
 
 .search-go-btn:hover { background: #f5a800; }
 
-/* Autocomplete dropdown */
+/* ── Autocomplete dropdown ── */
 .ac-dropdown {
     display: none;
     position: absolute;
@@ -110,6 +140,16 @@
 .ac-item:last-child { border-bottom: none; }
 .ac-item:hover { background: rgba(234,155,0,0.08); color: #f0e8d4; }
 
+.ac-item-sub {
+    font-size: 0.72rem;
+    color: #4a3c28;
+    margin-left: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+}
+
 /* ── Results area ── */
 .results-area {
     flex: 1;
@@ -126,17 +166,29 @@
     padding: 1rem 1.5rem;
     border-bottom: 1px solid rgba(234,155,0,0.08);
     flex-shrink: 0;
+    gap: 1rem;
 }
 
 .results-title {
     font-size: 0.9rem;
     color: #6b5c3e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
 }
 
 .results-title strong { color: #f0e8d4; }
 
+.results-title-sub {
+    font-size: 0.75rem;
+    color: #4a3c28;
+    margin-top: 2px;
+}
+
 .view-toggle {
     display: flex;
+    flex-shrink: 0;
     background: #0e0b05;
     border: 1px solid rgba(234,155,0,0.12);
     border-radius: 7px;
@@ -174,7 +226,7 @@
     gap: 10px;
 }
 
-.pub-card {
+.result-card {
     background: #18130a;
     border: 1px solid rgba(234,155,0,0.12);
     border-radius: 12px;
@@ -185,7 +237,40 @@
     transition: border-color 0.15s;
 }
 
-.pub-card:hover { border-color: rgba(234,155,0,0.25); }
+.result-card:hover { border-color: rgba(234,155,0,0.25); }
+
+.card-info { flex: 1; min-width: 0; }
+
+.card-info h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f0e8d4;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-info h3 img { height: 20px; width: auto; object-fit: contain; flex-shrink: 0; }
+
+.card-sub {
+    font-size: 0.75rem;
+    color: #6b5c3e;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-logs-list { display: flex; flex-direction: column; gap: 3px; }
+
+.card-log-row { font-size: 0.75rem; color: #7a6040; display: flex; gap: 8px; }
+.card-log-row .log-price { color: #c8b888; font-weight: 500; }
+.card-log-row .log-size  { color: #6b5c3e; }
+.card-log-row .log-meta  { color: #4a3c28; margin-left: auto; }
 
 .price-badge {
     flex-shrink: 0;
@@ -201,39 +286,6 @@
 .price-badge .avg-label { font-size: 0.65rem; color: #6b5c3e; margin-top: 1px; }
 .price-badge .from { font-size: 0.7rem; color: #7a6040; margin-top: 4px; }
 
-.pub-info { flex: 1; min-width: 0; }
-
-.pub-info h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #f0e8d4;
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.pub-info .pub-addr {
-    font-size: 0.75rem;
-    color: #6b5c3e;
-    margin-bottom: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.pub-logs-list { display: flex; flex-direction: column; gap: 3px; }
-
-.pub-log-row {
-    font-size: 0.75rem;
-    color: #7a6040;
-    display: flex;
-    gap: 8px;
-}
-
-.pub-log-row .log-price { color: #c8b888; font-weight: 500; }
-.pub-log-row .log-size  { color: #6b5c3e; }
-.pub-log-row .log-meta  { color: #4a3c28; margin-left: auto; }
 
 .rank-badge {
     flex-shrink: 0;
@@ -251,9 +303,48 @@
     margin-top: 2px;
 }
 
-.rank-badge.gold   { background: rgba(234,155,0,0.2); border-color: rgba(234,155,0,0.4); color: #ea9b00; }
+.rank-badge.gold   { background: rgba(234,155,0,0.2);   border-color: rgba(234,155,0,0.4);   color: #ea9b00; }
 .rank-badge.silver { background: rgba(180,180,180,0.1); border-color: rgba(180,180,180,0.25); color: #a0a0a0; }
-.rank-badge.bronze { background: rgba(180,100,40,0.15); border-color: rgba(180,100,40,0.3); color: #c07040; }
+.rank-badge.bronze { background: rgba(180,100,40,0.15); border-color: rgba(180,100,40,0.3);  color: #c07040; }
+
+/* ── Pub result header ── */
+.pub-header-card {
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.15);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pub-header-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #ea9b00, #c47200);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.pub-header-info h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f0e8d4;
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
+}
+
+.pub-header-info .pub-addr { font-size: 0.75rem; color: #6b5c3e; }
+
+.section-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #4a3c28;
+    padding: 0.5rem 0 0.25rem;
+}
 
 /* ── Map view ── */
 #map-view {
@@ -306,11 +397,24 @@
 <div class="search-page">
 
     <div class="search-hero">
-        <h1>Find a beer</h1>
-        <p>See where it's been logged and what it costs</p>
+        <h1 id="hero-title">Find a beer</h1>
+        <p id="hero-sub">See where it's been logged and what it costs</p>
+
+        <!-- Mode toggle -->
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="mode-beer">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.44.5-3 .5"/><path d="M14 7.5c1 0 1.44.5 3 .5"/><path d="M3 7.5V18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7.5"/></svg>
+                Beer
+            </button>
+            <button class="mode-btn" id="mode-pub">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Pub
+            </button>
+        </div>
+
         <div class="search-wrap">
             <div class="search-input-row">
-                <input type="text" id="beer-search" placeholder="e.g. Guinness, Moretti, Neck Oil…" autocomplete="off">
+                <input type="text" id="main-search" placeholder="e.g. Guinness, Moretti, Neck Oil…" autocomplete="off">
                 <button class="search-go-btn" id="search-go">Search</button>
             </div>
             <div class="ac-dropdown" id="ac-dropdown"></div>
@@ -320,10 +424,13 @@
     <!-- Results -->
     <div class="results-area" id="results-area">
         <div class="results-header">
-            <span class="results-title" style="display:flex;align-items:center;gap:10px;">
-                <img id="results-beer-img" style="display:none;height:36px;width:auto;object-fit:contain;">
-                Results for <strong id="results-beer-name"></strong>
-            </span>
+            <div class="results-title">
+                <img id="results-img" style="display:none;height:36px;width:auto;object-fit:contain;" alt="">
+                <div>
+                    <div>Results for <strong id="results-name"></strong></div>
+                    <div class="results-title-sub" id="results-sub"></div>
+                </div>
+            </div>
             <div class="view-toggle">
                 <button class="toggle-btn active" id="list-btn">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
@@ -346,7 +453,7 @@
     <!-- No results -->
     <div class="empty-state" id="no-results" style="display:none">
         <span class="empty-icon">🍺</span>
-        <span id="no-results-msg">No logs found for that beer yet.</span>
+        <span id="no-results-msg">No logs found yet.</span>
         <span style="font-size:0.8rem;margin-top:0.25rem">Be the first — log it from the <a href="{% url 'map' %}" style="color:#ea9b00">map</a>.</span>
     </div>
 
@@ -359,171 +466,166 @@
 let resultsMap = null;
 let resultMarkers = [];
 let currentView = 'list';
+let searchMode = 'beer'; // 'beer' | 'pub'
+let selectedPubId = null;
 
-// ── Beer autocomplete ──────────────────────────────────────────────────────
-const beerSearchInput = document.getElementById('beer-search');
-const acDropdown = document.getElementById('ac-dropdown');
+// ── Mode toggle ────────────────────────────────────────────────────────────
+const modeBeerBtn = document.getElementById('mode-beer');
+const modePubBtn  = document.getElementById('mode-pub');
+const searchInput = document.getElementById('main-search');
+const acDropdown  = document.getElementById('ac-dropdown');
+
+const MODES = {
+    beer: {
+        title:       'Find a beer',
+        sub:         'See where it\u2019s been logged and what it costs',
+        placeholder: 'e.g. Guinness, Moretti, Neck Oil\u2026',
+    },
+    pub: {
+        title:       'Find a pub',
+        sub:         'See what\u2019s on tap and what people are paying',
+        placeholder: 'e.g. The Crown, Red Lion\u2026',
+    },
+};
+
+function setMode(mode) {
+    searchMode = mode;
+    const cfg = MODES[mode];
+    document.getElementById('hero-title').textContent = cfg.title;
+    document.getElementById('hero-sub').textContent   = cfg.sub;
+    searchInput.placeholder = cfg.placeholder;
+    modeBeerBtn.classList.toggle('active', mode === 'beer');
+    modePubBtn.classList.toggle('active',  mode === 'pub');
+    searchInput.value = '';
+    acDropdown.classList.remove('visible');
+    document.getElementById('results-area').classList.remove('visible');
+    document.getElementById('no-results').style.display = 'none';
+    selectedPubId = null;
+}
+
+modeBeerBtn.addEventListener('click', () => setMode('beer'));
+modePubBtn.addEventListener('click',  () => setMode('pub'));
+
+// ── Autocomplete ───────────────────────────────────────────────────────────
 let acDebounce;
 
-beerSearchInput.addEventListener('input', () => {
+searchInput.addEventListener('input', () => {
     clearTimeout(acDebounce);
-    const q = beerSearchInput.value.trim();
+    const q = searchInput.value.trim();
     if (q.length < 1) { acDropdown.classList.remove('visible'); return; }
     acDebounce = setTimeout(() => fetchAC(q), 200);
 });
 
 async function fetchAC(q) {
-    const res = await fetch(`/map/api/beers/?q=${encodeURIComponent(q)}`);
-    const { beers } = await res.json();
-    if (!beers.length) { acDropdown.classList.remove('visible'); return; }
-    acDropdown.innerHTML = beers.map(b => `
-        <div class="ac-item" data-name="${esc(b.name)}">
-            ${b.image_url
-                ? `<img src="${esc(b.image_url)}" style="width:20px;height:28px;object-fit:contain;flex-shrink:0;">`
-                : `<div style="width:20px;"></div>`}
-            ${esc(b.name)}
-        </div>
-    `).join('');
-    acDropdown.classList.add('visible');
-    acDropdown.querySelectorAll('.ac-item').forEach(el => {
-        el.addEventListener('click', () => {
-            beerSearchInput.value = el.dataset.name;
-            acDropdown.classList.remove('visible');
-            runSearch(el.dataset.name);
+    if (searchMode === 'beer') {
+        const res = await fetch(`/map/api/beers/?q=${encodeURIComponent(q)}`);
+        const { beers } = await res.json();
+        if (!beers.length) { acDropdown.classList.remove('visible'); return; }
+        acDropdown.innerHTML = beers.map(b => `
+            <div class="ac-item" data-id="${b.id}" data-name="${esc(b.name)}">
+                ${b.image_url
+                    ? `<img src="${esc(b.image_url)}" style="width:20px;height:28px;object-fit:contain;flex-shrink:0;">`
+                    : `<div style="width:20px;"></div>`}
+                ${esc(b.name)}
+            </div>
+        `).join('');
+        acDropdown.classList.add('visible');
+        acDropdown.querySelectorAll('.ac-item').forEach(el => {
+            el.addEventListener('click', () => {
+                window.location.href = `/beers/${el.dataset.id}/`;
+            });
         });
-    });
+    } else {
+        const res = await fetch(`/map/api/pubs/search/?q=${encodeURIComponent(q)}`);
+        const { pubs } = await res.json();
+        if (!pubs.length) { acDropdown.classList.remove('visible'); return; }
+        acDropdown.innerHTML = pubs.map(p => `
+            <div class="ac-item" data-id="${p.id}" data-name="${esc(p.name)}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b5c3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                ${esc(p.name)}
+                ${p.address ? `<span class="ac-item-sub">${esc(p.address)}</span>` : ''}
+            </div>
+        `).join('');
+        acDropdown.classList.add('visible');
+        acDropdown.querySelectorAll('.ac-item').forEach(el => {
+            el.addEventListener('click', () => {
+                window.location.href = `/pubs/${el.dataset.id}/`;
+            });
+        });
+    }
 }
 
 document.addEventListener('click', e => {
-    if (!beerSearchInput.contains(e.target) && !acDropdown.contains(e.target))
+    if (!searchInput.contains(e.target) && !acDropdown.contains(e.target))
         acDropdown.classList.remove('visible');
 });
 
-// ── Search ─────────────────────────────────────────────────────────────────
-document.getElementById('search-go').addEventListener('click', () => {
-    const q = beerSearchInput.value.trim();
-    if (q) runSearch(q);
+// ── Search button / Enter ──────────────────────────────────────────────────
+document.getElementById('search-go').addEventListener('click', triggerSearch);
+searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { acDropdown.classList.remove('visible'); triggerSearch(); }
 });
 
-beerSearchInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-        acDropdown.classList.remove('visible');
-        const q = beerSearchInput.value.trim();
-        if (q) runSearch(q);
-    }
-});
-
-async function runSearch(beer) {
-    // Reset UI
-    document.getElementById('results-area').classList.remove('visible');
-    document.getElementById('no-results').style.display = 'none';
-
-    const res = await fetch(`/map/api/beer-results/?beer=${encodeURIComponent(beer)}`);
-    const data = await res.json();
-
-    if (!data.found || !data.pubs.length) {
-        document.getElementById('no-results').style.display = 'flex';
-        document.getElementById('no-results-msg').textContent =
-            `No logs found for "${data.beer}" yet.`;
-        return;
-    }
-
-    const beerNameEl = document.getElementById('results-beer-name');
-    beerNameEl.textContent = data.beer;
-    const heroImg = document.getElementById('results-beer-img');
-    if (data.image_url) {
-        heroImg.src = data.image_url;
-        heroImg.style.display = 'inline-block';
+function triggerSearch() {
+    const q = searchInput.value.trim();
+    if (!q) return;
+    if (searchMode === 'beer') {
+        fetch(`/map/api/beers/?q=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(({ beers }) => {
+                if (beers.length) {
+                    window.location.href = `/beers/${beers[0].id}/`;
+                } else {
+                    showNoResults(`No beer found matching "${q}".`);
+                }
+            });
     } else {
-        heroImg.style.display = 'none';
+        if (selectedPubId) {
+            window.location.href = `/pubs/${selectedPubId}/`;
+        } else {
+            fetch(`/map/api/pubs/search/?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(({ pubs }) => {
+                    if (pubs.length) {
+                        window.location.href = `/pubs/${pubs[0].id}/`;
+                    } else {
+                        showNoResults(`No pub found matching "${q}".`);
+                    }
+                });
+        }
     }
-    renderList(data.pubs);
-    renderMapPins(data.pubs);
-    document.getElementById('results-area').classList.add('visible');
 }
 
-// ── List view ──────────────────────────────────────────────────────────────
-function renderList(pubs) {
-    const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    document.getElementById('list-view').innerHTML = pubs.map((pub, i) => `
-        <div class="pub-card">
-            <div class="rank-badge ${rankClass(i)}">${i + 1}</div>
-            <div class="price-badge">
-                <div class="avg">£${pub.avg_price.toFixed(2)}</div>
-                <div class="avg-label">avg price</div>
-                ${pub.min_price < pub.avg_price
-                    ? `<div class="from">from £${pub.min_price.toFixed(2)}</div>`
-                    : ''}
-            </div>
-            <div class="pub-info">
-                <h3>${esc(pub.name)}</h3>
-                ${pub.address ? `<div class="pub-addr">${esc(pub.address)}</div>` : ''}
-                <div class="pub-logs-list">
-                    ${pub.logs.map(l => `
-                        <div class="pub-log-row">
-                            <span class="log-price">£${l.price}</span>
-                            <span class="log-size">${l.serving_size}</span>
-                            <span class="log-meta">${l.user} · ${l.logged_at}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// ── Map view ───────────────────────────────────────────────────────────────
+// ── Map helpers ────────────────────────────────────────────────────────────
 function initResultsMap() {
     if (resultsMap) return;
     resultsMap = L.map('results-map', { zoomControl: false }).setView([54.5, -2.5], 6);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
         subdomains: 'abcd',
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+        attribution: '\u00a9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors \u00a9 <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(resultsMap);
     L.control.zoom({ position: 'bottomright' }).addTo(resultsMap);
 }
 
-function renderMapPins(pubs) {
-    initResultsMap();
+function clearMapMarkers() {
     resultMarkers.forEach(m => m.remove());
     resultMarkers = [];
+}
 
-    const bounds = [];
-
-    pubs.forEach(pub => {
-        const icon = L.divIcon({
-            className: '',
-            html: `<div style="
-                width:32px; height:32px;
-                background:linear-gradient(135deg,#ea9b00,#c47200);
-                border-radius:50% 50% 50% 0;
-                transform:rotate(-45deg);
-                border:2px solid #1a1008;
-                box-shadow:0 2px 8px rgba(0,0,0,0.5);
-            "></div>`,
-            iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -34],
-        });
-
-        const popup = `
-            <div class="map-popup">
-                <div class="map-popup-name">${esc(pub.name)}</div>
-                <div class="map-popup-price">£${pub.avg_price.toFixed(2)}</div>
-                <div class="map-popup-sub">avg · ${pub.log_count} log${pub.log_count !== 1 ? 's' : ''}</div>
-                ${pub.min_price < pub.avg_price
-                    ? `<div class="map-popup-sub" style="margin-top:2px">from £${pub.min_price.toFixed(2)}</div>`
-                    : ''}
-            </div>`;
-
-        const marker = L.marker([pub.lat, pub.lng], { icon })
-            .bindPopup(popup, { maxWidth: 220 })
-            .addTo(resultsMap);
-
-        resultMarkers.push(marker);
-        bounds.push([pub.lat, pub.lng]);
+function amberIcon() {
+    return L.divIcon({
+        className: '',
+        html: `<div style="
+            width:32px; height:32px;
+            background:linear-gradient(135deg,#ea9b00,#c47200);
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            border:2px solid #1a1008;
+            box-shadow:0 2px 8px rgba(0,0,0,0.5);
+        "></div>`,
+        iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -34],
     });
-
-    if (bounds.length) resultsMap.fitBounds(bounds, { padding: [40, 40] });
 }
 
 // ── View toggle ────────────────────────────────────────────────────────────
@@ -541,11 +643,25 @@ document.getElementById('map-btn').addEventListener('click', () => {
     document.getElementById('map-view').classList.add('visible');
     document.getElementById('list-btn').classList.remove('active');
     document.getElementById('map-btn').classList.add('active');
-    // Leaflet needs a resize nudge after becoming visible
     if (resultsMap) setTimeout(() => resultsMap.invalidateSize(), 50);
 });
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Util ───────────────────────────────────────────────────────────────────
+function resetResults() {
+    document.getElementById('results-area').classList.remove('visible');
+    document.getElementById('no-results').style.display = 'none';
+    currentView = 'list';
+    document.getElementById('list-view').style.display = '';
+    document.getElementById('map-view').classList.remove('visible');
+    document.getElementById('list-btn').classList.add('active');
+    document.getElementById('map-btn').classList.remove('active');
+}
+
+function showNoResults(msg) {
+    document.getElementById('no-results').style.display = 'flex';
+    document.getElementById('no-results-msg').textContent = msg;
+}
+
 function esc(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+{% load pints_extras %}
+
+{% block title %}{{ beer.name }} — TappFinder{% endblock %}
+
+{% block extra_styles %}
+/* ── Hero ── */
+.beer-hero {
+    max-width: 900px;
+    margin: 2.5rem auto 0;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.beer-img-wrap {
+    flex-shrink: 0;
+    width: 130px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(234,155,0,0.06);
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.beer-img-wrap img {
+    max-width: 110px;
+    max-height: 160px;
+    object-fit: contain;
+}
+
+.beer-img-placeholder {
+    font-size: 3.5rem;
+    opacity: 0.4;
+}
+
+.beer-hero-info { flex: 1; min-width: 0; }
+
+.beer-hero-info h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #f0e8d4;
+    margin-bottom: 0.75rem;
+    line-height: 1.15;
+}
+
+/* Stats row */
+.stats-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.stat-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-chip .val {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ea9b00;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.stat-chip .lbl {
+    font-size: 0.72rem;
+    color: #6b5c3e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-divider {
+    width: 1px;
+    background: rgba(234,155,0,0.12);
+    align-self: stretch;
+    margin: 2px 0;
+}
+
+/* View toggle */
+.view-toggle {
+    display: inline-flex;
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.toggle-btn {
+    padding: 5px 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: inherit;
+    background: transparent;
+    border: none;
+    color: #6b5c3e;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.toggle-btn.active {
+    background: rgba(234,155,0,0.15);
+    color: #ea9b00;
+}
+
+/* ── Content column ── */
+.content-col {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.section-heading {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #4a3c28;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(234,155,0,0.08);
+}
+
+/* ── Pub cards ── */
+.pub-list { display: flex; flex-direction: column; gap: 10px; }
+
+.pub-card {
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: border-color 0.15s;
+}
+
+.pub-card:hover { border-color: rgba(234,155,0,0.28); }
+
+.rank-badge {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(234,155,0,0.08);
+    border: 1px solid rgba(234,155,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #6b5c3e;
+    margin-top: 2px;
+}
+
+.rank-badge.gold   { background: rgba(234,155,0,0.2);   border-color: rgba(234,155,0,0.4);   color: #ea9b00; }
+.rank-badge.silver { background: rgba(180,180,180,0.1); border-color: rgba(180,180,180,0.25); color: #a0a0a0; }
+.rank-badge.bronze { background: rgba(180,100,40,0.15); border-color: rgba(180,100,40,0.3);  color: #c07040; }
+
+.price-badge {
+    flex-shrink: 0;
+    text-align: center;
+    background: rgba(234,155,0,0.1);
+    border: 1px solid rgba(234,155,0,0.2);
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    min-width: 74px;
+}
+
+.price-badge .avg { font-size: 1.2rem; font-weight: 700; color: #ea9b00; }
+.price-badge .avg-label { font-size: 0.65rem; color: #6b5c3e; margin-top: 1px; }
+.price-badge .from { font-size: 0.7rem; color: #7a6040; margin-top: 4px; }
+
+.pub-info { flex: 1; min-width: 0; }
+
+.pub-info h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f0e8d4;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pub-addr {
+    font-size: 0.75rem;
+    color: #6b5c3e;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.log-rows { display: flex; flex-direction: column; gap: 3px; }
+
+.log-row {
+    font-size: 0.75rem;
+    color: #7a6040;
+    display: flex;
+    gap: 8px;
+}
+
+.log-row .log-price { color: #c8b888; font-weight: 500; }
+.log-row .log-size  { color: #6b5c3e; }
+.log-row .log-meta  { color: #4a3c28; margin-left: auto; }
+
+/* ── Empty state ── */
+.empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: #4a3c28;
+    font-size: 0.9rem;
+}
+
+.empty-state .icon { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
+
+/* ── Map ── */
+#pub-map {
+    display: none;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 500px;
+}
+
+#pub-map.visible { display: block; }
+
+/* Leaflet popup dark override */
+.leaflet-popup-content-wrapper {
+    background: #18130a !important;
+    border: 1px solid rgba(234,155,0,0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    color: #f0e8d4 !important;
+    padding: 0 !important;
+}
+
+.leaflet-popup-tip { background: #18130a !important; }
+.leaflet-popup-content { margin: 0 !important; min-width: 190px; }
+
+.map-popup { padding: 11px 14px; }
+.map-popup-name  { font-size: 0.88rem; font-weight: 600; color: #f0e8d4; margin-bottom: 3px; }
+.map-popup-price { font-size: 1rem; font-weight: 700; color: #ea9b00; margin-bottom: 1px; }
+.map-popup-sub   { font-size: 0.72rem; color: #6b5c3e; }
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="beer-hero">
+    <div class="beer-img-wrap">
+        {% if beer.image_url %}
+            <img src="{{ beer.image_url }}" alt="{{ beer.name }}">
+        {% else %}
+            <span class="beer-img-placeholder">🍺</span>
+        {% endif %}
+    </div>
+
+    <div class="beer-hero-info">
+        <h1>{{ beer.name }}</h1>
+
+        {% if total_logs > 0 %}
+        <div class="stats-row">
+            <div class="stat-chip">
+                <span class="val">{{ total_logs }}</span>
+                <span class="lbl">log{{ total_logs|pluralize }}</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-chip">
+                <span class="val">{{ pub_count }}</span>
+                <span class="lbl">pub{{ pub_count|pluralize }}</span>
+            </div>
+            {% if avg_price %}
+            <div class="stat-divider"></div>
+            <div class="stat-chip">
+                <span class="val">£{{ avg_price }}</span>
+                <span class="lbl">avg price</span>
+            </div>
+            {% endif %}
+            {% if min_price and min_price != avg_price %}
+            <div class="stat-divider"></div>
+            <div class="stat-chip">
+                <span class="val">£{{ min_price }}</span>
+                <span class="lbl">cheapest</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if pubs %}
+        <div class="view-toggle">
+            <button class="toggle-btn active" id="list-btn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+                List
+            </button>
+            <button class="toggle-btn" id="map-btn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>
+                Map
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Content -->
+<div class="content-col">
+
+    {% if pubs %}
+        <div class="section-heading">Where to find it — sorted by avg price</div>
+
+        <!-- List view -->
+        <div class="pub-list" id="pub-list">
+            {% for pub in pubs %}
+            {% with forloop.counter0 as i %}
+            <a class="pub-card" href="/pubs/{{ pub.id }}/" style="text-decoration:none;">
+                <div class="rank-badge {% if i == 0 %}gold{% elif i == 1 %}silver{% elif i == 2 %}bronze{% endif %}">
+                    {{ forloop.counter }}
+                </div>
+                <div class="price-badge">
+                    <div class="avg">£{{ pub.avg_price }}</div>
+                    <div class="avg-label">avg price</div>
+                    {% if pub.min_price < pub.avg_price %}
+                    <div class="from">from £{{ pub.min_price }}</div>
+                    {% endif %}
+                </div>
+                <div class="pub-info">
+                    <h3>{{ pub.name }}</h3>
+                    {% if pub.address %}<div class="pub-addr">{{ pub.address }}</div>{% endif %}
+                    <div class="log-rows">
+                        {% for log in pub.logs %}
+                        <div class="log-row">
+                            <span class="log-price">£{{ log.price }}</span>
+                            <span class="log-size">{{ log.serving_size }}</span>
+                            <span class="log-meta">{{ log.user }} · {{ log.logged_at }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </a>
+            {% endwith %}
+            {% endfor %}
+        </div>
+
+        <!-- Map view -->
+        <div id="pub-map"></div>
+
+    {% else %}
+        <div class="empty-state">
+            <span class="icon">🍺</span>
+            No pints of {{ beer.name }} have been logged yet.<br>
+            <a href="{% url 'map' %}" style="color:#ea9b00;font-size:0.85rem;margin-top:0.5rem;display:inline-block;">
+                Be the first — log it from the map
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+
+{% if pubs %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const PUB_DATA = {{ pubs|safe_json }};
+
+let pubMap = null;
+
+function initMap() {
+    if (pubMap) return;
+    pubMap = L.map('pub-map', { zoomControl: false }).setView([54.5, -2.5], 6);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        attribution: '\u00a9 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors \u00a9 <a href="https://carto.com/attributions">CARTO</a>',
+    }).addTo(pubMap);
+    L.control.zoom({ position: 'bottomright' }).addTo(pubMap);
+
+    const bounds = [];
+    PUB_DATA.forEach(pub => {
+        const icon = L.divIcon({
+            className: '',
+            html: `<div style="
+                width:32px;height:32px;
+                background:linear-gradient(135deg,#ea9b00,#c47200);
+                border-radius:50% 50% 50% 0;
+                transform:rotate(-45deg);
+                border:2px solid #1a1008;
+                box-shadow:0 2px 8px rgba(0,0,0,0.5);
+            "></div>`,
+            iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -34],
+        });
+        L.marker([pub.lat, pub.lng], { icon })
+            .bindPopup(`
+                <div class="map-popup">
+                    <div class="map-popup-name"><a href="/pubs/${pub.id}/" style="color:#f0e8d4;text-decoration:none;">${esc(pub.name)}</a></div>
+                    <div class="map-popup-price">\u00a3${pub.avg_price.toFixed(2)}</div>
+                    <div class="map-popup-sub">avg \u00b7 ${pub.log_count} log${pub.log_count !== 1 ? 's' : ''}</div>
+                    ${pub.min_price < pub.avg_price
+                        ? `<div class="map-popup-sub" style="margin-top:2px">from \u00a3${pub.min_price.toFixed(2)}</div>`
+                        : ''}
+                </div>`, { maxWidth: 220 })
+            .addTo(pubMap);
+        bounds.push([pub.lat, pub.lng]);
+    });
+    if (bounds.length) pubMap.fitBounds(bounds, { padding: [40, 40] });
+}
+
+document.getElementById('list-btn').addEventListener('click', () => {
+    document.getElementById('pub-list').style.display = '';
+    document.getElementById('pub-map').classList.remove('visible');
+    document.getElementById('list-btn').classList.add('active');
+    document.getElementById('map-btn').classList.remove('active');
+});
+
+document.getElementById('map-btn').addEventListener('click', () => {
+    document.getElementById('pub-list').style.display = 'none';
+    document.getElementById('pub-map').classList.add('visible');
+    document.getElementById('list-btn').classList.remove('active');
+    document.getElementById('map-btn').classList.add('active');
+    initMap();
+    setTimeout(() => pubMap && pubMap.invalidateSize(), 50);
+});
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+{% endif %}
+
+{% endblock %}
