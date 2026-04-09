@@ -1,0 +1,881 @@
+{% extends "base.html" %}
+
+{% block title %}Map — TappFinder{% endblock %}
+
+{% block extra_styles %}
+#map-container {
+    position: relative;
+    height: 500px;
+    transition: height 0.3s ease;
+}
+
+#map-container.expanded {
+    height: calc(100vh - 56px);
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+    background: #111008;
+}
+
+/* ── Toolbar ── */
+.map-toolbar {
+    position: absolute;
+    top: 12px;
+    left: 0; right: 0;
+    z-index: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0 12px;
+    pointer-events: none;
+}
+
+.toolbar-left, .toolbar-right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: all;
+}
+
+.map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.2);
+    border-radius: 8px;
+    color: #f0e8d4;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: 'Inter', system-ui, sans-serif;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+
+.map-btn:hover { background: #221a0d; border-color: rgba(234,155,0,0.4); }
+.map-btn.active { background: #ea9b00; color: #0e0b05; border-color: #ea9b00; }
+
+.map-btn-icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.2);
+    border-radius: 8px;
+    color: #f0e8d4;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.map-btn-icon:hover { background: #221a0d; border-color: rgba(234,155,0,0.4); }
+
+/* ── Search ── */
+.search-box {
+    display: none;
+    flex-direction: column;
+    width: 280px;
+}
+
+.search-box.visible { display: flex; }
+
+.search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.3);
+    border-radius: 8px;
+    color: #f0e8d4;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+
+.search-input:focus { border-color: rgba(234,155,0,0.6); }
+
+.search-results {
+    margin-top: 4px;
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    display: none;
+}
+
+.search-results.visible { display: block; }
+
+.search-result-item {
+    padding: 9px 12px;
+    font-size: 0.82rem;
+    color: #c8b888;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(234,155,0,0.06);
+    line-height: 1.3;
+}
+
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: rgba(234,155,0,0.08); color: #f0e8d4; }
+.search-result-item .result-name { font-weight: 500; color: #f0e8d4; }
+.search-result-item .result-addr { font-size: 0.75rem; color: #6b5c3e; margin-top: 2px; }
+
+/* ── Mode banner ── */
+.mode-banner {
+    display: none;
+    position: absolute;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.3);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    color: #c8b888;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.mode-banner.visible { display: block; }
+
+/* ── Modal ── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-overlay.visible { display: flex; }
+
+.modal {
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.15);
+    border-radius: 16px;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f0e8d4;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+}
+
+.modal .modal-sub {
+    font-size: 0.8rem;
+    color: #6b5c3e;
+    margin-bottom: 1.25rem;
+}
+
+.modal-divider {
+    height: 1px;
+    background: rgba(234,155,0,0.08);
+    margin: 1rem 0;
+}
+
+/* ── Form fields ── */
+.field { margin-bottom: 0.9rem; }
+
+.field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #a08060;
+    margin-bottom: 0.35rem;
+}
+
+.field input,
+.field textarea {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 8px;
+    color: #f0e8d4;
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input:focus,
+.field textarea:focus {
+    border-color: rgba(234,155,0,0.5);
+    box-shadow: 0 0 0 3px rgba(234,155,0,0.08);
+}
+
+.field textarea { resize: vertical; min-height: 60px; }
+
+.price-row {
+    display: flex;
+    gap: 8px;
+}
+
+.price-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.price-wrap .currency {
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: #6b5c3e;
+    font-size: 0.88rem;
+    pointer-events: none;
+}
+
+.price-wrap input { padding-left: 22px; }
+
+/* Serving size pills */
+.size-pills {
+    display: flex;
+    gap: 6px;
+}
+
+.size-pill {
+    flex: 1;
+    padding: 6px 0;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: inherit;
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 6px;
+    color: #6b5c3e;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.size-pill.selected {
+    background: rgba(234,155,0,0.15);
+    border-color: rgba(234,155,0,0.5);
+    color: #ea9b00;
+}
+
+/* Beer autocomplete */
+.autocomplete-wrap { position: relative; }
+
+.autocomplete-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 10;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+.autocomplete-dropdown.visible { display: block; }
+
+.autocomplete-item {
+    padding: 8px 12px;
+    font-size: 0.83rem;
+    color: #c8b888;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(234,155,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:hover { background: rgba(234,155,0,0.08); color: #f0e8d4; }
+.autocomplete-item.new-beer { color: #ea9b00; font-style: italic; }
+
+/* ── Buttons ── */
+.btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 1.25rem;
+}
+
+.btn-primary {
+    flex: 1;
+    padding: 0.65rem;
+    background: #ea9b00;
+    border: none;
+    border-radius: 8px;
+    color: #0e0b05;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-primary:hover { background: #f5a800; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-secondary {
+    padding: 0.65rem 1rem;
+    background: transparent;
+    border: 1px solid rgba(234,155,0,0.15);
+    border-radius: 8px;
+    color: #6b5c3e;
+    font-size: 0.88rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-secondary:hover { border-color: rgba(234,155,0,0.3); color: #a08060; }
+
+/* ── Pub popup (inside Leaflet) ── */
+.leaflet-popup-content-wrapper {
+    background: #18130a !important;
+    border: 1px solid rgba(234,155,0,0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    color: #f0e8d4 !important;
+    padding: 0 !important;
+}
+
+.leaflet-popup-tip { background: #18130a !important; }
+.leaflet-popup-content { margin: 0 !important; width: auto !important; min-width: 220px; }
+
+.popup-inner { padding: 14px 16px; }
+.popup-name { font-size: 0.95rem; font-weight: 600; color: #f0e8d4; margin-bottom: 3px; }
+.popup-addr { font-size: 0.75rem; color: #6b5c3e; margin-bottom: 10px; }
+.popup-stats { display: flex; gap: 12px; margin-bottom: 10px; }
+.popup-stat { font-size: 0.78rem; color: #a08060; }
+.popup-stat span { color: #ea9b00; font-weight: 600; }
+.popup-logs { border-top: 1px solid rgba(234,155,0,0.08); padding-top: 10px; margin-bottom: 10px; }
+.popup-log-row { font-size: 0.75rem; color: #7a6040; padding: 2px 0; }
+.popup-log-row b { color: #c8b888; }
+.popup-btn {
+    display: block; width: 100%;
+    padding: 8px;
+    background: #ea9b00; border: none; border-radius: 7px;
+    color: #0e0b05; font-size: 0.82rem; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: background 0.15s;
+}
+.popup-btn:hover { background: #f5a800; }
+.popup-loading { font-size: 0.78rem; color: #6b5c3e; padding: 6px 0; }
+
+{% endblock %}
+
+{% block content %}
+<div id="map-container">
+    <div id="map"></div>
+</div>
+
+<!-- Toolbar -->
+<div class="map-toolbar">
+    <div class="toolbar-left">
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button class="map-btn" id="add-pub-btn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add pub
+            </button>
+        </div>
+        <div class="search-box" id="search-box">
+            <input class="search-input" id="pub-search" type="text" placeholder="Search for a pub or address…" autocomplete="off">
+            <div class="search-results" id="search-results"></div>
+        </div>
+    </div>
+
+    <div class="toolbar-right">
+        <button class="map-btn-icon" id="expand-btn" title="Expand map">
+            <svg id="expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        </button>
+        <button class="map-btn-icon" id="locate-btn" title="Find my location">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/></svg>
+        </button>
+    </div>
+</div>
+
+<div class="mode-banner" id="mode-banner">Click the map to place the pub, or search above</div>
+
+<!-- Log pint modal -->
+<div class="modal-overlay" id="log-modal">
+    <div class="modal">
+        <h3>Log a pint</h3>
+        <p class="modal-sub" id="log-modal-pub"></p>
+
+        <div class="field">
+            <label>Beer</label>
+            <div class="autocomplete-wrap">
+                <input type="text" id="beer-input" placeholder="Start typing a beer name…" autocomplete="off">
+                <div class="autocomplete-dropdown" id="beer-dropdown"></div>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Price &amp; serving size</label>
+            <div class="price-row">
+                <div class="price-wrap">
+                    <span class="currency">£</span>
+                    <input type="number" id="price-input" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="size-pills">
+                    <button class="size-pill selected" data-size="pint">Pint</button>
+                    <button class="size-pill" data-size="half">Half</button>
+                    <button class="size-pill" data-size="third">Third</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Notes <span style="color:#4a3c28">(optional)</span></label>
+            <textarea id="notes-input" placeholder="Any thoughts on this one?"></textarea>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-secondary" id="log-cancel">Cancel</button>
+            <button class="btn-primary" id="log-submit">Log it</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add pub modal -->
+<div class="modal-overlay" id="add-pub-modal">
+    <div class="modal">
+        <h3>Add a pub</h3>
+        <p class="modal-sub" id="add-pub-coords"></p>
+
+        <div class="field">
+            <label>Pub name</label>
+            <input type="text" id="add-pub-name" placeholder="e.g. The Crown">
+        </div>
+
+        <div class="field">
+            <label>Address <span style="color:#4a3c28">(optional)</span></label>
+            <input type="text" id="add-pub-address" placeholder="e.g. 12 High Street">
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-secondary" id="add-pub-cancel">Cancel</button>
+            <button class="btn-primary" id="add-pub-submit">Add pub</button>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+const CSRF = '{{ csrf_token }}';
+const IS_AUTH = {{ user.is_authenticated|yesno:"true,false" }};
+
+let map, userMarker;
+let addPubMode = false;
+let pendingMarker = null;
+let pendingLatLng = null;
+let selectedPubId = null;
+let selectedSize = 'pint';
+
+// ── Map init ─────────────────────────────────────────────────────────────────
+function initMap() {
+    map = L.map('map', { zoomControl: false }).setView([54.5, -2.5], 6);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+    }).addTo(map);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    map.on('click', onMapClick);
+    loadPubs();
+}
+
+// ── Custom markers ────────────────────────────────────────────────────────────
+function pubIcon() {
+    return L.divIcon({
+        className: '',
+        html: `<div style="
+            width:32px; height:32px;
+            background:linear-gradient(135deg,#ea9b00,#c47200);
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            border:2px solid #1a1008;
+            box-shadow:0 2px 8px rgba(0,0,0,0.5);
+        "></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -34],
+    });
+}
+
+function pendingIcon() {
+    return L.divIcon({
+        className: '',
+        html: `<div style="
+            width:32px; height:32px;
+            background:linear-gradient(135deg,#60a0f0,#3060c0);
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            border:2px solid #1a1008;
+            box-shadow:0 2px 8px rgba(0,0,0,0.5);
+        "></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -34],
+    });
+}
+
+// ── Load pubs ─────────────────────────────────────────────────────────────────
+async function loadPubs() {
+    const res = await fetch('/map/api/pubs/');
+    const geojson = await res.json();
+    geojson.features.forEach(addPubToMap);
+}
+
+function addPubToMap(feature) {
+    const { id, name, log_count, avg_price } = feature.properties;
+    const [lng, lat] = feature.geometry.coordinates;
+    const marker = L.marker([lat, lng], { icon: pubIcon() }).addTo(map);
+
+    marker.on('click', () => openPubPopup(marker, id, name, log_count, avg_price));
+}
+
+function openPubPopup(marker, id, name, log_count, avg_price) {
+    const priceStr = avg_price ? `£${avg_price.toFixed(2)}` : '–';
+    const logStr = log_count === 1 ? '1 log' : `${log_count} logs`;
+
+    const content = document.createElement('div');
+    content.className = 'popup-inner';
+    content.innerHTML = `
+        <div class="popup-name">${esc(name)}</div>
+        <div class="popup-stats">
+            <div class="popup-stat"><span>${priceStr}</span> avg pint</div>
+            <div class="popup-stat"><span>${logStr}</span></div>
+        </div>
+        <div class="popup-logs" id="popup-logs-${id}">
+            <div class="popup-loading">Loading recent logs…</div>
+        </div>
+        ${IS_AUTH ? `<button class="popup-btn" onclick="openLogModal(${id}, '${esc(name)}')">🍺 Log a pint here</button>` : ''}
+    `;
+
+    marker.bindPopup(content, { maxWidth: 260 }).openPopup();
+    fetchPubLogs(id);
+}
+
+async function fetchPubLogs(pubId) {
+    const res = await fetch(`/map/api/pubs/${pubId}/`);
+    const data = await res.json();
+    const el = document.getElementById(`popup-logs-${pubId}`);
+    if (!el) return;
+
+    if (!data.logs.length) {
+        el.innerHTML = '<div class="popup-log-row" style="color:#4a3c28">No logs yet.</div>';
+        return;
+    }
+
+    el.innerHTML = data.logs.slice(0, 4).map(l =>
+        `<div class="popup-log-row"><b>${esc(l.beer)}</b> – £${l.price} (${l.serving_size}) by ${esc(l.user)}</div>`
+    ).join('');
+}
+
+// ── Geolocation ───────────────────────────────────────────────────────────────
+document.getElementById('locate-btn').addEventListener('click', locateUser);
+
+function locateUser() {
+    if (!navigator.geolocation) return alert('Geolocation not supported by your browser.');
+    navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        map.setView([lat, lng], 15);
+        if (userMarker) userMarker.remove();
+        userMarker = L.circleMarker([lat, lng], {
+            radius: 8,
+            fillColor: '#60a0f0',
+            fillOpacity: 1,
+            color: '#fff',
+            weight: 2,
+        }).addTo(map).bindPopup('You are here').openPopup();
+    }, () => alert('Could not get your location.'));
+}
+
+// ── Add pub mode ──────────────────────────────────────────────────────────────
+const addPubBtn = document.getElementById('add-pub-btn');
+const searchBox = document.getElementById('search-box');
+const modeBanner = document.getElementById('mode-banner');
+
+addPubBtn.addEventListener('click', () => {
+    if (!IS_AUTH) { window.location.href = '/accounts/login/'; return; }
+    addPubMode ? exitAddPubMode() : enterAddPubMode();
+});
+
+function enterAddPubMode() {
+    addPubMode = true;
+    addPubBtn.classList.add('active');
+    addPubBtn.textContent = '✕ Cancel';
+    searchBox.classList.add('visible');
+    modeBanner.classList.add('visible');
+    document.getElementById('pub-search').focus();
+}
+
+function exitAddPubMode() {
+    addPubMode = false;
+    addPubBtn.classList.remove('active');
+    addPubBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add pub`;
+    searchBox.classList.remove('visible');
+    modeBanner.classList.remove('visible');
+    document.getElementById('pub-search').value = '';
+    document.getElementById('search-results').classList.remove('visible');
+    if (pendingMarker) { pendingMarker.remove(); pendingMarker = null; }
+    pendingLatLng = null;
+}
+
+function onMapClick(e) {
+    if (!addPubMode) return;
+    pendingLatLng = e.latlng;
+    if (pendingMarker) pendingMarker.remove();
+    pendingMarker = L.marker(e.latlng, { icon: pendingIcon() }).addTo(map);
+    showAddPubModal('', '');
+}
+
+// ── Pub search (Nominatim) ────────────────────────────────────────────────────
+let searchDebounce;
+const pubSearchInput = document.getElementById('pub-search');
+const searchResults = document.getElementById('search-results');
+
+pubSearchInput.addEventListener('input', () => {
+    clearTimeout(searchDebounce);
+    const q = pubSearchInput.value.trim();
+    if (q.length < 2) { searchResults.classList.remove('visible'); return; }
+    searchDebounce = setTimeout(() => nominatimSearch(q), 400);
+});
+
+async function nominatimSearch(q) {
+    const res = await fetch(`/map/api/geocode/?q=${encodeURIComponent(q)}`);
+    const { results } = await res.json();
+
+    if (!results.length) {
+        searchResults.innerHTML = '<div class="search-result-item" style="color:#4a3c28">No results found</div>';
+        searchResults.classList.add('visible');
+        return;
+    }
+
+    searchResults.innerHTML = results.map((r, i) => `
+        <div class="search-result-item" data-idx="${i}">
+            <div class="result-name">${esc(r.display_name.split(',')[0])}</div>
+            <div class="result-addr">${esc(r.display_name.split(',').slice(1, 3).join(',').trim())}</div>
+        </div>
+    `).join('');
+    searchResults.classList.add('visible');
+
+    searchResults.querySelectorAll('.search-result-item').forEach((el, i) => {
+        el.addEventListener('click', () => {
+            const r = results[i];
+            pendingLatLng = L.latLng(parseFloat(r.lat), parseFloat(r.lon));
+            if (pendingMarker) pendingMarker.remove();
+            pendingMarker = L.marker(pendingLatLng, { icon: pendingIcon() }).addTo(map);
+            map.setView(pendingLatLng, 17);
+            searchResults.classList.remove('visible');
+            const name = r.display_name.split(',')[0];
+            const addr = r.display_name.split(',').slice(1, 3).join(',').trim();
+            showAddPubModal(name, addr);
+        });
+    });
+}
+
+// ── Add pub modal ─────────────────────────────────────────────────────────────
+function showAddPubModal(name, address) {
+    document.getElementById('add-pub-name').value = name;
+    document.getElementById('add-pub-address').value = address;
+    const coords = pendingLatLng
+        ? `${pendingLatLng.lat.toFixed(5)}, ${pendingLatLng.lng.toFixed(5)}`
+        : '';
+    document.getElementById('add-pub-coords').textContent = coords ? `Pin at ${coords}` : '';
+    document.getElementById('add-pub-modal').classList.add('visible');
+    document.getElementById('add-pub-name').focus();
+}
+
+document.getElementById('add-pub-cancel').addEventListener('click', () => {
+    document.getElementById('add-pub-modal').classList.remove('visible');
+    if (pendingMarker) { pendingMarker.remove(); pendingMarker = null; }
+    pendingLatLng = null;
+});
+
+document.getElementById('add-pub-submit').addEventListener('click', async () => {
+    const name = document.getElementById('add-pub-name').value.trim();
+    const address = document.getElementById('add-pub-address').value.trim();
+    if (!name) { document.getElementById('add-pub-name').focus(); return; }
+    if (!pendingLatLng) return;
+
+    const btn = document.getElementById('add-pub-submit');
+    btn.disabled = true; btn.textContent = 'Adding…';
+
+    const res = await postJSON('/map/api/pubs/add/', {
+        name, address,
+        latitude: pendingLatLng.lat,
+        longitude: pendingLatLng.lng,
+    });
+
+    btn.disabled = false; btn.textContent = 'Add pub';
+
+    if (res.error) { alert(res.error); return; }
+
+    // Replace pending marker with a real pub pin
+    pendingMarker.remove();
+    pendingMarker = null;
+
+    const feature = {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [pendingLatLng.lng, pendingLatLng.lat] },
+        properties: { id: res.id, name: res.name, log_count: 0, avg_price: null },
+    };
+    addPubToMap(feature);
+
+    document.getElementById('add-pub-modal').classList.remove('visible');
+    exitAddPubMode();
+    openLogModal(res.id, res.name);
+});
+
+// ── Log pint modal ────────────────────────────────────────────────────────────
+function openLogModal(pubId, pubName) {
+    if (!IS_AUTH) { window.location.href = '/accounts/login/'; return; }
+    selectedPubId = pubId;
+    document.getElementById('log-modal-pub').textContent = pubName;
+    document.getElementById('beer-input').value = '';
+    document.getElementById('price-input').value = '';
+    document.getElementById('notes-input').value = '';
+    selectedSize = 'pint';
+    document.querySelectorAll('.size-pill').forEach(p => p.classList.toggle('selected', p.dataset.size === 'pint'));
+    document.getElementById('log-modal').classList.add('visible');
+    document.getElementById('beer-input').focus();
+}
+
+document.getElementById('log-cancel').addEventListener('click', () => {
+    document.getElementById('log-modal').classList.remove('visible');
+});
+
+document.getElementById('log-submit').addEventListener('click', async () => {
+    const beer = document.getElementById('beer-input').value.trim();
+    const price = document.getElementById('price-input').value.trim();
+    if (!beer || !price) return;
+
+    const btn = document.getElementById('log-submit');
+    btn.disabled = true; btn.textContent = 'Logging…';
+
+    const res = await postJSON('/map/api/log/', {
+        pub_id: selectedPubId,
+        beer,
+        price: parseFloat(price),
+        serving_size: selectedSize,
+        notes: document.getElementById('notes-input').value.trim(),
+    });
+
+    btn.disabled = false; btn.textContent = 'Log it';
+
+    if (res.error) { alert(res.error); return; }
+    document.getElementById('log-modal').classList.remove('visible');
+});
+
+// Serving size pills
+document.querySelectorAll('.size-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        selectedSize = pill.dataset.size;
+        document.querySelectorAll('.size-pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+    });
+});
+
+// ── Beer autocomplete ─────────────────────────────────────────────────────────
+const beerInput = document.getElementById('beer-input');
+const beerDropdown = document.getElementById('beer-dropdown');
+let beerDebounce;
+
+beerInput.addEventListener('input', () => {
+    clearTimeout(beerDebounce);
+    const q = beerInput.value.trim();
+    if (!q) { beerDropdown.classList.remove('visible'); return; }
+    beerDebounce = setTimeout(() => fetchBeers(q), 200);
+});
+
+async function fetchBeers(q) {
+    const res = await fetch(`/map/api/beers/?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+
+    const items = data.beers.map(b => ({ ...b, isNew: false }));
+    const exactMatch = data.beers.some(b => b.name.toLowerCase() === q.toLowerCase());
+    if (!exactMatch) items.push({ name: q, image_url: '', isNew: true });
+
+    beerDropdown.innerHTML = items.map(item => `
+        <div class="autocomplete-item ${item.isNew ? 'new-beer' : ''}" data-name="${esc(item.name)}">
+            ${item.image_url
+                ? `<img src="${esc(item.image_url)}" style="width:24px;height:32px;object-fit:contain;flex-shrink:0;">`
+                : `<div style="width:24px;"></div>`}
+            <span>${item.isNew ? '+ Add "' + esc(item.name) + '"' : esc(item.name)}</span>
+        </div>
+    `).join('');
+    beerDropdown.classList.add('visible');
+
+    beerDropdown.querySelectorAll('.autocomplete-item').forEach(el => {
+        el.addEventListener('click', () => {
+            beerInput.value = el.dataset.name;
+            beerDropdown.classList.remove('visible');
+        });
+    });
+}
+
+document.addEventListener('click', e => {
+    if (!beerInput.contains(e.target) && !beerDropdown.contains(e.target))
+        beerDropdown.classList.remove('visible');
+    if (!pubSearchInput.contains(e.target) && !searchResults.contains(e.target))
+        searchResults.classList.remove('visible');
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function postJSON(url, data) {
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify(data),
+    });
+    return res.json();
+}
+
+// ── Expand / collapse ─────────────────────────────────────────────────────────
+const expandBtn = document.getElementById('expand-btn');
+const mapContainer = document.getElementById('map-container');
+let expanded = false;
+
+const expandIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
+const collapseIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`;
+
+expandBtn.addEventListener('click', () => {
+    expanded = !expanded;
+    mapContainer.classList.toggle('expanded', expanded);
+    expandBtn.innerHTML = expanded ? collapseIcon : expandIcon;
+    expandBtn.title = expanded ? 'Collapse map' : 'Expand map';
+    setTimeout(() => map.invalidateSize(), 310);
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+initMap();
+</script>
+{% endblock %}

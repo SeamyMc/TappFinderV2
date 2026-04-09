@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TappFinder{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: #111008;
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        /* Subtle amber glow top-center */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -180px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(234,155,0,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .card {
+            background: #18130a;
+            border: 1px solid rgba(234,155,0,0.15);
+            border-radius: 16px;
+            padding: 2.5rem 2.25rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ea9b00, #c47200);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .logo-text h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #f5f0e8;
+            letter-spacing: -0.01em;
+        }
+
+        .logo-text p {
+            font-size: 0.72rem;
+            color: #6b5c3e;
+            margin-top: 1px;
+            font-weight: 400;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #f0e8d4;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.4rem;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #6b5c3e;
+            margin-bottom: 1.75rem;
+        }
+
+        .messages {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .messages li {
+            padding: 0.65rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.83rem;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+
+        .messages .error {
+            background: rgba(220, 60, 30, 0.1);
+            border: 1px solid rgba(220, 60, 30, 0.25);
+            color: #f07060;
+        }
+
+        .messages .success {
+            background: rgba(50, 180, 80, 0.1);
+            border: 1px solid rgba(50, 180, 80, 0.25);
+            color: #60d080;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #a08060;
+            margin-bottom: 0.4rem;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            background: #0e0b05;
+            border: 1px solid rgba(234,155,0,0.12);
+            border-radius: 8px;
+            color: #f0e8d4;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus {
+            border-color: rgba(234,155,0,0.5);
+            box-shadow: 0 0 0 3px rgba(234,155,0,0.08);
+        }
+
+        .helptext {
+            font-size: 0.73rem;
+            color: #4a3c28;
+            margin-top: 0.35rem;
+            line-height: 1.5;
+        }
+
+        .errorlist {
+            list-style: none;
+            margin-top: 0.35rem;
+        }
+
+        .errorlist li {
+            font-size: 0.78rem;
+            color: #f07060;
+            font-weight: 500;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.7rem;
+            margin-top: 1.5rem;
+            background: #ea9b00;
+            border: none;
+            border-radius: 8px;
+            color: #0e0b05;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .btn:hover {
+            background: #f5a800;
+            box-shadow: 0 4px 16px rgba(234,155,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .divider-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .divider-row span {
+            height: 1px;
+            flex: 1;
+            background: rgba(234,155,0,0.08);
+        }
+
+        .divider-row p {
+            font-size: 0.75rem;
+            color: #4a3c28;
+            white-space: nowrap;
+        }
+
+        .footer-link {
+            text-align: center;
+            font-size: 0.83rem;
+            color: #5a4a30;
+        }
+
+        .footer-link a {
+            color: #ea9b00;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+
+        .footer-link a:hover {
+            color: #f5c040;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <div class="logo-icon">🍺</div>
+            <div class="logo-text">
+                <h1>TappFinder</h1>
+                <p>Find your perfect pint</p>
+            </div>
+        </div>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Register — TappFinder{% endblock %}
+
+{% block content %}
+<h2>Create an account</h2>
+<p class="subtitle">Join TappFinder and start exploring</p>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    {% for field in form %}
+    <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <p class="helptext">{{ field.help_text }}</p>
+        {% endif %}
+        {% if field.errors %}
+        <ul class="errorlist">
+            {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn">Create account</button>
+</form>
+
+<div class="divider-row"><span></span><p>or</p><span></span></div>
+
+<p class="footer-link">
+    Already have an account? <a href="{% url 'login' %}">Sign in</a>
+</p>
+{% endblock %}

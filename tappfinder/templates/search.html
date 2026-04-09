@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block title %}Search — TappFinder{% endblock %}
+
+{% block extra_styles %}
+.search-page {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 56px);
+}
+
+/* ── Search hero ── */
+.search-hero {
+    padding: 3rem 1.5rem 2rem;
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.search-hero h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #f0e8d4;
+    margin-bottom: 0.4rem;
+}
+
+.search-hero p {
+    font-size: 0.9rem;
+    color: #6b5c3e;
+    margin-bottom: 1.5rem;
+}
+
+.search-wrap {
+    position: relative;
+}
+
+.search-input-row {
+    display: flex;
+    gap: 0;
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-input-row:focus-within {
+    border-color: rgba(234,155,0,0.5);
+    box-shadow: 0 0 0 3px rgba(234,155,0,0.08);
+}
+
+.search-input-row input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    background: transparent;
+    border: none;
+    color: #f0e8d4;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+}
+
+.search-input-row input::placeholder { color: #4a3c28; }
+
+.search-go-btn {
+    padding: 0 1.1rem;
+    background: #ea9b00;
+    border: none;
+    color: #0e0b05;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+
+.search-go-btn:hover { background: #f5a800; }
+
+/* Autocomplete dropdown */
+.ac-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 50;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    text-align: left;
+}
+
+.ac-dropdown.visible { display: block; }
+
+.ac-item {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    color: #c8b888;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(234,155,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover { background: rgba(234,155,0,0.08); color: #f0e8d4; }
+
+/* ── Results area ── */
+.results-area {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+}
+
+.results-area.visible { display: flex; }
+
+.results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(234,155,0,0.08);
+    flex-shrink: 0;
+}
+
+.results-title {
+    font-size: 0.9rem;
+    color: #6b5c3e;
+}
+
+.results-title strong { color: #f0e8d4; }
+
+.view-toggle {
+    display: flex;
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.toggle-btn {
+    padding: 5px 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: inherit;
+    background: transparent;
+    border: none;
+    color: #6b5c3e;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.toggle-btn.active {
+    background: rgba(234,155,0,0.15);
+    color: #ea9b00;
+}
+
+/* ── List view ── */
+#list-view {
+    padding: 1.25rem 1.5rem;
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pub-card {
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: border-color 0.15s;
+}
+
+.pub-card:hover { border-color: rgba(234,155,0,0.25); }
+
+.price-badge {
+    flex-shrink: 0;
+    text-align: center;
+    background: rgba(234,155,0,0.1);
+    border: 1px solid rgba(234,155,0,0.2);
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    min-width: 72px;
+}
+
+.price-badge .avg { font-size: 1.2rem; font-weight: 700; color: #ea9b00; }
+.price-badge .avg-label { font-size: 0.65rem; color: #6b5c3e; margin-top: 1px; }
+.price-badge .from { font-size: 0.7rem; color: #7a6040; margin-top: 4px; }
+
+.pub-info { flex: 1; min-width: 0; }
+
+.pub-info h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f0e8d4;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pub-info .pub-addr {
+    font-size: 0.75rem;
+    color: #6b5c3e;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pub-logs-list { display: flex; flex-direction: column; gap: 3px; }
+
+.pub-log-row {
+    font-size: 0.75rem;
+    color: #7a6040;
+    display: flex;
+    gap: 8px;
+}
+
+.pub-log-row .log-price { color: #c8b888; font-weight: 500; }
+.pub-log-row .log-size  { color: #6b5c3e; }
+.pub-log-row .log-meta  { color: #4a3c28; margin-left: auto; }
+
+.rank-badge {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(234,155,0,0.08);
+    border: 1px solid rgba(234,155,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6b5c3e;
+    margin-top: 2px;
+}
+
+.rank-badge.gold   { background: rgba(234,155,0,0.2); border-color: rgba(234,155,0,0.4); color: #ea9b00; }
+.rank-badge.silver { background: rgba(180,180,180,0.1); border-color: rgba(180,180,180,0.25); color: #a0a0a0; }
+.rank-badge.bronze { background: rgba(180,100,40,0.15); border-color: rgba(180,100,40,0.3); color: #c07040; }
+
+/* ── Map view ── */
+#map-view {
+    display: none;
+    flex: 1;
+}
+
+#map-view.visible { display: block; }
+
+#results-map {
+    height: calc(100vh - 56px - 53px);
+    width: 100%;
+}
+
+/* ── Empty / no-results states ── */
+.empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+    color: #4a3c28;
+    font-size: 0.9rem;
+    gap: 0.5rem;
+}
+
+.empty-icon { font-size: 2.5rem; }
+
+/* Leaflet popup dark override */
+.leaflet-popup-content-wrapper {
+    background: #18130a !important;
+    border: 1px solid rgba(234,155,0,0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    color: #f0e8d4 !important;
+    padding: 0 !important;
+}
+
+.leaflet-popup-tip { background: #18130a !important; }
+.leaflet-popup-content { margin: 0 !important; min-width: 200px; }
+
+.map-popup { padding: 12px 14px; }
+.map-popup-name { font-size: 0.9rem; font-weight: 600; color: #f0e8d4; margin-bottom: 4px; }
+.map-popup-price { font-size: 1.1rem; font-weight: 700; color: #ea9b00; margin-bottom: 2px; }
+.map-popup-sub { font-size: 0.72rem; color: #6b5c3e; }
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+
+    <div class="search-hero">
+        <h1>Find a beer</h1>
+        <p>See where it's been logged and what it costs</p>
+        <div class="search-wrap">
+            <div class="search-input-row">
+                <input type="text" id="beer-search" placeholder="e.g. Guinness, Moretti, Neck Oil…" autocomplete="off">
+                <button class="search-go-btn" id="search-go">Search</button>
+            </div>
+            <div class="ac-dropdown" id="ac-dropdown"></div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-area" id="results-area">
+        <div class="results-header">
+            <span class="results-title" style="display:flex;align-items:center;gap:10px;">
+                <img id="results-beer-img" style="display:none;height:36px;width:auto;object-fit:contain;">
+                Results for <strong id="results-beer-name"></strong>
+            </span>
+            <div class="view-toggle">
+                <button class="toggle-btn active" id="list-btn">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+                    List
+                </button>
+                <button class="toggle-btn" id="map-btn">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/></svg>
+                    Map
+                </button>
+            </div>
+        </div>
+
+        <div id="list-view"></div>
+
+        <div id="map-view">
+            <div id="results-map"></div>
+        </div>
+    </div>
+
+    <!-- No results -->
+    <div class="empty-state" id="no-results" style="display:none">
+        <span class="empty-icon">🍺</span>
+        <span id="no-results-msg">No logs found for that beer yet.</span>
+        <span style="font-size:0.8rem;margin-top:0.25rem">Be the first — log it from the <a href="{% url 'map' %}" style="color:#ea9b00">map</a>.</span>
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let resultsMap = null;
+let resultMarkers = [];
+let currentView = 'list';
+
+// ── Beer autocomplete ──────────────────────────────────────────────────────
+const beerSearchInput = document.getElementById('beer-search');
+const acDropdown = document.getElementById('ac-dropdown');
+let acDebounce;
+
+beerSearchInput.addEventListener('input', () => {
+    clearTimeout(acDebounce);
+    const q = beerSearchInput.value.trim();
+    if (q.length < 1) { acDropdown.classList.remove('visible'); return; }
+    acDebounce = setTimeout(() => fetchAC(q), 200);
+});
+
+async function fetchAC(q) {
+    const res = await fetch(`/map/api/beers/?q=${encodeURIComponent(q)}`);
+    const { beers } = await res.json();
+    if (!beers.length) { acDropdown.classList.remove('visible'); return; }
+    acDropdown.innerHTML = beers.map(b => `
+        <div class="ac-item" data-name="${esc(b.name)}">
+            ${b.image_url
+                ? `<img src="${esc(b.image_url)}" style="width:20px;height:28px;object-fit:contain;flex-shrink:0;">`
+                : `<div style="width:20px;"></div>`}
+            ${esc(b.name)}
+        </div>
+    `).join('');
+    acDropdown.classList.add('visible');
+    acDropdown.querySelectorAll('.ac-item').forEach(el => {
+        el.addEventListener('click', () => {
+            beerSearchInput.value = el.dataset.name;
+            acDropdown.classList.remove('visible');
+            runSearch(el.dataset.name);
+        });
+    });
+}
+
+document.addEventListener('click', e => {
+    if (!beerSearchInput.contains(e.target) && !acDropdown.contains(e.target))
+        acDropdown.classList.remove('visible');
+});
+
+// ── Search ─────────────────────────────────────────────────────────────────
+document.getElementById('search-go').addEventListener('click', () => {
+    const q = beerSearchInput.value.trim();
+    if (q) runSearch(q);
+});
+
+beerSearchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        acDropdown.classList.remove('visible');
+        const q = beerSearchInput.value.trim();
+        if (q) runSearch(q);
+    }
+});
+
+async function runSearch(beer) {
+    // Reset UI
+    document.getElementById('results-area').classList.remove('visible');
+    document.getElementById('no-results').style.display = 'none';
+
+    const res = await fetch(`/map/api/beer-results/?beer=${encodeURIComponent(beer)}`);
+    const data = await res.json();
+
+    if (!data.found || !data.pubs.length) {
+        document.getElementById('no-results').style.display = 'flex';
+        document.getElementById('no-results-msg').textContent =
+            `No logs found for "${data.beer}" yet.`;
+        return;
+    }
+
+    const beerNameEl = document.getElementById('results-beer-name');
+    beerNameEl.textContent = data.beer;
+    const heroImg = document.getElementById('results-beer-img');
+    if (data.image_url) {
+        heroImg.src = data.image_url;
+        heroImg.style.display = 'inline-block';
+    } else {
+        heroImg.style.display = 'none';
+    }
+    renderList(data.pubs);
+    renderMapPins(data.pubs);
+    document.getElementById('results-area').classList.add('visible');
+}
+
+// ── List view ──────────────────────────────────────────────────────────────
+function renderList(pubs) {
+    const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    document.getElementById('list-view').innerHTML = pubs.map((pub, i) => `
+        <div class="pub-card">
+            <div class="rank-badge ${rankClass(i)}">${i + 1}</div>
+            <div class="price-badge">
+                <div class="avg">£${pub.avg_price.toFixed(2)}</div>
+                <div class="avg-label">avg price</div>
+                ${pub.min_price < pub.avg_price
+                    ? `<div class="from">from £${pub.min_price.toFixed(2)}</div>`
+                    : ''}
+            </div>
+            <div class="pub-info">
+                <h3>${esc(pub.name)}</h3>
+                ${pub.address ? `<div class="pub-addr">${esc(pub.address)}</div>` : ''}
+                <div class="pub-logs-list">
+                    ${pub.logs.map(l => `
+                        <div class="pub-log-row">
+                            <span class="log-price">£${l.price}</span>
+                            <span class="log-size">${l.serving_size}</span>
+                            <span class="log-meta">${l.user} · ${l.logged_at}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ── Map view ───────────────────────────────────────────────────────────────
+function initResultsMap() {
+    if (resultsMap) return;
+    resultsMap = L.map('results-map', { zoomControl: false }).setView([54.5, -2.5], 6);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+    }).addTo(resultsMap);
+    L.control.zoom({ position: 'bottomright' }).addTo(resultsMap);
+}
+
+function renderMapPins(pubs) {
+    initResultsMap();
+    resultMarkers.forEach(m => m.remove());
+    resultMarkers = [];
+
+    const bounds = [];
+
+    pubs.forEach(pub => {
+        const icon = L.divIcon({
+            className: '',
+            html: `<div style="
+                width:32px; height:32px;
+                background:linear-gradient(135deg,#ea9b00,#c47200);
+                border-radius:50% 50% 50% 0;
+                transform:rotate(-45deg);
+                border:2px solid #1a1008;
+                box-shadow:0 2px 8px rgba(0,0,0,0.5);
+            "></div>`,
+            iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -34],
+        });
+
+        const popup = `
+            <div class="map-popup">
+                <div class="map-popup-name">${esc(pub.name)}</div>
+                <div class="map-popup-price">£${pub.avg_price.toFixed(2)}</div>
+                <div class="map-popup-sub">avg · ${pub.log_count} log${pub.log_count !== 1 ? 's' : ''}</div>
+                ${pub.min_price < pub.avg_price
+                    ? `<div class="map-popup-sub" style="margin-top:2px">from £${pub.min_price.toFixed(2)}</div>`
+                    : ''}
+            </div>`;
+
+        const marker = L.marker([pub.lat, pub.lng], { icon })
+            .bindPopup(popup, { maxWidth: 220 })
+            .addTo(resultsMap);
+
+        resultMarkers.push(marker);
+        bounds.push([pub.lat, pub.lng]);
+    });
+
+    if (bounds.length) resultsMap.fitBounds(bounds, { padding: [40, 40] });
+}
+
+// ── View toggle ────────────────────────────────────────────────────────────
+document.getElementById('list-btn').addEventListener('click', () => {
+    currentView = 'list';
+    document.getElementById('list-view').style.display = '';
+    document.getElementById('map-view').classList.remove('visible');
+    document.getElementById('list-btn').classList.add('active');
+    document.getElementById('map-btn').classList.remove('active');
+});
+
+document.getElementById('map-btn').addEventListener('click', () => {
+    currentView = 'map';
+    document.getElementById('list-view').style.display = 'none';
+    document.getElementById('map-view').classList.add('visible');
+    document.getElementById('list-btn').classList.remove('active');
+    document.getElementById('map-btn').classList.add('active');
+    // Leaflet needs a resize nudge after becoming visible
+    if (resultsMap) setTimeout(() => resultsMap.invalidateSize(), 50);
+});
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+{% endblock %}
