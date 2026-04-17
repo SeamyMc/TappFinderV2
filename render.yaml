@@ -3,7 +3,6 @@ services:
     name: tappfinder
     runtime: python
     plan: free
-    pythonVersion: "3.13.5"
     buildCommand: "./build.sh"
     startCommand: "gunicorn tappfinder.wsgi:application"
     envVars:
