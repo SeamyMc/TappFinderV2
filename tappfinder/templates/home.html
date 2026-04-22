@@ -65,6 +65,21 @@
 }
 
 .btn:active { transform: translateY(1px); }
+
+.hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.hero-secondary {
+    color: #a08060;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.hero-secondary:hover { color: #ea9b00; }
 {% endblock %}
 
 {% block content %}
@@ -75,7 +90,10 @@
     {% if user.is_authenticated %}
         <a href="{% url 'profile' %}" class="btn">Go to your profile</a>
     {% else %}
-        <a href="{% url 'login' %}" class="btn">Sign in to get started</a>
+        <div class="hero-actions">
+            <a href="{% url 'map' %}" class="btn">Browse the map</a>
+            <a href="{% url 'login' %}" class="hero-secondary">Sign in to start contributing →</a>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
