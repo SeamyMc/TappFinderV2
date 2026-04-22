@@ -23,7 +23,6 @@ from .models import (
 
 
 @ensure_csrf_cookie
-@login_required
 def map_view(request):
     return render(request, 'pints/map.html')
 

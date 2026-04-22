@@ -65,12 +65,10 @@ def upload_avatar(request):
     return redirect('profile')
 
 
-@login_required
 def search(request):
     return render(request, 'search.html')
 
 
-@login_required
 def feed(request):
     logs = (
         PintLog.objects
