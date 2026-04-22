@@ -1,11 +1,19 @@
 import json
 from django import template
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
 @register.filter
 def safe_json(value):
-    return json.dumps(value)
+    return mark_safe(
+        json.dumps(value)
+        .replace('<', '\\u003c')
+        .replace('>', '\\u003e')
+        .replace('&', '\\u0026')
+        .replace('\u2028', '\\u2028')
+        .replace('\u2029', '\\u2029')
+    )
 
 # Deterministic avatar background colour from a username string
 _AVATAR_COLOURS = [

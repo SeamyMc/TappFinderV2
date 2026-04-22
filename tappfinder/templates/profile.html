@@ -4,7 +4,7 @@
 
 {% block extra_styles %}
 .profile-page {
-    max-width: 560px;
+    max-width: 720px;
     margin: 4rem auto;
     padding: 0 1.5rem;
 }
@@ -74,6 +74,44 @@
     color: #6b5c3e;
 }
 
+.profile-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.profile-score {
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.profile-score .score-val {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ea9b00;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    display: block;
+}
+
+.profile-score .score-lbl {
+    font-size: 0.65rem;
+    color: #6b5c3e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+    display: block;
+}
+
+.contrib-points {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #ea9b00;
+    margin-left: 0.4rem;
+    white-space: nowrap;
+}
+
 .divider {
     height: 1px;
     background: rgba(234,155,0,0.08);
@@ -97,6 +135,127 @@
     font-size: 0.875rem;
     color: #c8b888;
 }
+
+/* ── Contributions ── */
+.contrib-card {
+    margin-top: 1.5rem;
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.15);
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+}
+
+.contrib-heading {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #4a3c28;
+    margin-bottom: 1rem;
+}
+
+.contrib-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.contrib-stat {
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.08);
+    border-radius: 10px;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+}
+
+.contrib-stat .val {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ea9b00;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    display: block;
+}
+
+.contrib-stat .lbl {
+    font-size: 0.65rem;
+    color: #6b5c3e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+    display: block;
+}
+
+.contrib-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.contrib-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid rgba(234,155,0,0.06);
+}
+
+.contrib-row:first-child { border-top: none; }
+
+.contrib-icon {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(234,155,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+}
+
+.contrib-icon.kind-pint         { background: rgba(234,155,0,0.12); }
+.contrib-icon.kind-amenity      { background: rgba(74,192,120,0.1); }
+.contrib-icon.kind-event        { background: rgba(120,160,255,0.1); }
+.contrib-icon.kind-confirmation { background: rgba(180,180,180,0.08); }
+
+.contrib-body { flex: 1; min-width: 0; }
+
+.contrib-line {
+    font-size: 0.88rem;
+    color: #f0e8d4;
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.contrib-kind {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #a08060;
+    margin-right: 0.35rem;
+}
+
+.contrib-line a {
+    color: #ea9b00;
+    text-decoration: none;
+}
+.contrib-line a:hover { text-decoration: underline; }
+
+.contrib-meta {
+    font-size: 0.72rem;
+    color: #6b5c3e;
+    margin-top: 3px;
+}
+
+.contrib-empty {
+    font-size: 0.85rem;
+    color: #6b5c3e;
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+.contrib-empty a { color: #ea9b00; text-decoration: none; }
 {% endblock %}
 
 {% block content %}
@@ -123,8 +282,16 @@
             </div>
         </form>
 
-        <h2>{{ user.username }}</h2>
-        <p class="meta">Member since {{ user.date_joined|date:"F Y" }}</p>
+        <div class="profile-header">
+            <div>
+                <h2>{{ user.username }}</h2>
+                <p class="meta">Member since {{ user.date_joined|date:"F Y" }}</p>
+            </div>
+            <div class="profile-score">
+                <span class="score-val">{{ score }}</span>
+                <span class="score-lbl">Point{{ score|pluralize }}</span>
+            </div>
+        </div>
 
         <div class="divider"></div>
 
@@ -140,6 +307,55 @@
             <span class="field-label">Last login</span>
             <span class="field-value">{{ user.last_login|date:"d M Y, H:i" }}</span>
         </div>
+    </div>
+
+    <div class="contrib-card">
+        <div class="contrib-heading">Your contributions</div>
+
+        <div class="contrib-stats">
+            <div class="contrib-stat">
+                <span class="val">{{ totals.pints }}</span>
+                <span class="lbl">Pint{{ totals.pints|pluralize }}</span>
+            </div>
+            <div class="contrib-stat">
+                <span class="val">{{ totals.amenities }}</span>
+                <span class="lbl">Amenit{{ totals.amenities|pluralize:"y,ies" }}</span>
+            </div>
+            <div class="contrib-stat">
+                <span class="val">{{ totals.events }}</span>
+                <span class="lbl">Event{{ totals.events|pluralize }}</span>
+            </div>
+            <div class="contrib-stat">
+                <span class="val">{{ totals.confirmations }}</span>
+                <span class="lbl">Confirm{{ totals.confirmations|pluralize }}</span>
+            </div>
+        </div>
+
+        {% if contributions %}
+        <div class="contrib-list">
+            {% for c in contributions %}
+            <div class="contrib-row">
+                <div class="contrib-icon kind-{{ c.kind }}">
+                    {% if c.kind == 'pint' %}🍺
+                    {% elif c.kind == 'amenity' %}{{ c.amenity_report.amenity.icon|default:"📍" }}
+                    {% elif c.kind == 'event' %}{{ c.event.event_type.icon|default:"📅" }}
+                    {% elif c.kind == 'confirmation' %}{% if c.amenity_report_id %}{{ c.amenity_report.amenity.icon|default:"👍" }}{% else %}{{ c.event_confirmation.event.event_type.icon|default:"👍" }}{% endif %}
+                    {% endif %}
+                </div>
+                <div class="contrib-body">
+                    <div class="contrib-line">
+                        <span class="contrib-kind">{{ c.get_kind_display }}</span>{{ c.summary }}{% if c.pub %} at <a href="{% url 'pub_profile' c.pub.id %}">{{ c.pub.name }}</a>{% endif %}<span class="contrib-points">+{{ c.points }}</span>
+                    </div>
+                    <div class="contrib-meta">{{ c.created_at|timesince }} ago · {{ c.created_at|date:"d M Y" }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="contrib-empty">
+            No contributions yet — <a href="{% url 'map' %}">log a pint</a> to get started.
+        </div>
+        {% endif %}
     </div>
 </div>
 
