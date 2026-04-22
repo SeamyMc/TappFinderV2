@@ -251,6 +251,164 @@
 .map-popup { padding: 11px 14px; }
 .map-popup-name  { font-size: 0.88rem; font-weight: 600; color: #f0e8d4; margin-bottom: 3px; }
 .map-popup-sub   { font-size: 0.72rem; color: #6b5c3e; }
+
+/* ── Amenities ── */
+.amenity-section { margin-top: 2rem; }
+.amenity-header  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(234,155,0,0.08); }
+.amenity-header .section-heading { margin: 0; padding: 0; border: none; }
+
+.amenity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.amenity-chip {
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 92px;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.amenity-chip.status-confirmed { border-color: rgba(74, 192, 120, 0.35); background: rgba(74,192,120,0.04); }
+.amenity-chip.status-contested { border-color: rgba(234,155,0,0.4); }
+.amenity-chip.status-denied    { opacity: 0.55; }
+
+.amenity-chip-top { display: flex; align-items: flex-start; gap: 8px; }
+.amenity-chip-icon { font-size: 1rem; line-height: 1.2; flex-shrink: 0; }
+.amenity-chip-name { font-size: 0.75rem; font-weight: 600; color: #f0e8d4; flex: 1; min-width: 0; line-height: 1.25; word-break: break-word; }
+.amenity-chip-tally { font-size: 0.62rem; color: #6b5c3e; white-space: nowrap; flex-shrink: 0; align-self: center; }
+.amenity-chip-tally .yes { color: #4ac078; }
+.amenity-chip-tally .no  { color: #c06060; }
+
+.amenity-vote-row { display: flex; gap: 4px; margin-top: auto; }
+.amenity-vote-btn {
+    flex: 1;
+    padding: 5px 0;
+    font-size: 0.65rem;
+    font-weight: 600;
+    font-family: inherit;
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 6px;
+    color: #6b5c3e;
+    cursor: pointer;
+    transition: all 0.12s;
+}
+.amenity-vote-btn:hover { color: #f0e8d4; border-color: rgba(234,155,0,0.3); }
+.amenity-vote-btn.voted-yes { background: rgba(74,192,120,0.15); color: #4ac078; border-color: rgba(74,192,120,0.4); }
+.amenity-vote-btn.voted-no  { background: rgba(192,96,96,0.12); color: #c06060; border-color: rgba(192,96,96,0.35); }
+
+.amenity-login-prompt { font-size: 0.75rem; color: #6b5c3e; margin-top: 0.5rem; }
+.amenity-login-prompt a { color: #ea9b00; text-decoration: none; }
+
+.propose-btn {
+    background: transparent;
+    border: 1px dashed rgba(234,155,0,0.25);
+    border-radius: 8px;
+    color: #a08060;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.propose-btn:hover { color: #ea9b00; border-color: rgba(234,155,0,0.5); }
+
+/* ── Events ── */
+.event-section { margin-top: 2rem; }
+
+.event-list { display: flex; flex-direction: column; gap: 10px; }
+
+.event-card {
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+}
+
+.event-icon {
+    flex-shrink: 0;
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    background: rgba(234,155,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+}
+
+.event-body { flex: 1; min-width: 0; }
+
+.event-title-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.event-title { font-size: 0.95rem; font-weight: 600; color: #f0e8d4; }
+.event-recurrence { font-size: 0.68rem; color: #ea9b00; background: rgba(234,155,0,0.1); border-radius: 5px; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+.event-time { font-size: 0.78rem; color: #c8b888; margin-top: 2px; }
+.event-desc { font-size: 0.78rem; color: #7a6040; margin-top: 4px; line-height: 1.4; }
+.event-meta { font-size: 0.7rem; color: #4a3c28; margin-top: 6px; display: flex; gap: 8px; align-items: center; }
+.event-meta .delete-btn { background: none; border: none; color: #c06060; font-family: inherit; font-size: 0.7rem; cursor: pointer; padding: 0; }
+.event-meta .delete-btn:hover { color: #e08080; text-decoration: underline; }
+
+.event-empty { font-size: 0.85rem; color: #6b5c3e; padding: 1rem 0; }
+
+/* Modals for amenity-propose / event-create */
+.tf-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.tf-modal-overlay.visible { display: flex; }
+
+.tf-modal {
+    background: #18130a;
+    border: 1px solid rgba(234,155,0,0.15);
+    border-radius: 16px;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.tf-modal h3 { font-size: 1.1rem; font-weight: 600; color: #f0e8d4; margin-bottom: 0.25rem; letter-spacing: -0.02em; }
+.tf-modal-sub { font-size: 0.8rem; color: #6b5c3e; margin-bottom: 1.2rem; }
+
+.tf-field { margin-bottom: 0.9rem; }
+.tf-field label { display: block; font-size: 0.78rem; font-weight: 500; color: #a08060; margin-bottom: 0.35rem; }
+.tf-field input, .tf-field select, .tf-field textarea {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    background: #0e0b05;
+    border: 1px solid rgba(234,155,0,0.12);
+    border-radius: 8px;
+    color: #f0e8d4;
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+}
+.tf-field input:focus, .tf-field select:focus, .tf-field textarea:focus { border-color: rgba(234,155,0,0.5); }
+.tf-field textarea { resize: vertical; min-height: 60px; }
+
+.tf-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.2rem; }
+.tf-btn { padding: 0.55rem 1rem; font-size: 0.85rem; font-weight: 500; font-family: inherit; border-radius: 8px; cursor: pointer; border: none; }
+.tf-btn-primary  { background: #ea9b00; color: #0e0b05; }
+.tf-btn-primary:hover { background: #f5a810; }
+.tf-btn-ghost    { background: transparent; color: #a08060; }
+.tf-btn-ghost:hover { color: #f0e8d4; }
 {% endblock %}
 
 {% block content %}
@@ -371,7 +529,151 @@
         </div>
     {% endif %}
 
+    <!-- ── Amenities ── -->
+    <div class="amenity-section">
+        <div class="amenity-header">
+            <div class="section-heading">What's this place like?</div>
+            {% if user.is_authenticated %}
+            <button class="propose-btn" id="propose-amenity-btn">+ Suggest amenity</button>
+            {% endif %}
+        </div>
+
+        <div class="amenity-grid" id="amenity-grid">
+            {% for a in amenities %}
+            <div class="amenity-chip status-{{ a.status }}" data-slug="{{ a.slug }}">
+                <div class="amenity-chip-top">
+                    {% if a.icon %}<span class="amenity-chip-icon">{{ a.icon }}</span>{% endif %}
+                    <span class="amenity-chip-name" title="{{ a.description }}">{{ a.name }}</span>
+                    <span class="amenity-chip-tally">
+                        <span class="yes" data-yes>{{ a.yes_count }}</span>
+                        /
+                        <span class="no" data-no>{{ a.no_count }}</span>
+                    </span>
+                </div>
+                {% if user.is_authenticated %}
+                <div class="amenity-vote-row">
+                    <button class="amenity-vote-btn vote-yes {% if a.user_vote == True %}voted-yes{% endif %}" data-vote="yes">Yes</button>
+                    <button class="amenity-vote-btn vote-no {% if a.user_vote == False %}voted-no{% endif %}" data-vote="no">No</button>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not user.is_authenticated %}
+        <div class="amenity-login-prompt">
+            <a href="{% url 'login' %}?next={{ request.path }}">Sign in</a> to vote on amenities.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Events ── -->
+    <div class="event-section">
+        <div class="amenity-header">
+            <div class="section-heading">Upcoming events</div>
+            {% if user.is_authenticated %}
+            <button class="propose-btn" id="add-event-btn">+ Add event</button>
+            {% endif %}
+        </div>
+
+        <div class="event-list" id="event-list">
+            {% for ev in upcoming_events %}
+            <div class="event-card" data-event-id="{{ ev.id }}">
+                <div class="event-icon">{{ ev.event_type.icon|default:"📅" }}</div>
+                <div class="event-body">
+                    <div class="event-title-row">
+                        <div class="event-title">{{ ev.display_title }}</div>
+                        {% if ev.recurrence != 'none' %}
+                        <div class="event-recurrence">{{ ev.get_recurrence_display }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="event-time">{{ ev.starts_at|date:"D j M · H:i" }}</div>
+                    {% if ev.description %}<div class="event-desc">{{ ev.description }}</div>{% endif %}
+                    <div class="event-meta">
+                        <span>Added by {{ ev.created_by.username|default:"someone" }}</span>
+                        {% if user.is_authenticated and ev.created_by_id == user.id %}
+                        <span>·</span>
+                        <button class="delete-btn" data-delete-event="{{ ev.id }}">Delete</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="event-empty">No events scheduled yet{% if user.is_authenticated %} — be the first to add one{% endif %}.</div>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
+
+<!-- ── Propose amenity modal ── -->
+{% if user.is_authenticated %}
+<div class="tf-modal-overlay" id="propose-amenity-modal">
+    <div class="tf-modal">
+        <h3>Suggest a new amenity</h3>
+        <div class="tf-modal-sub">New suggestions are reviewed before appearing everywhere.</div>
+        <div class="tf-field">
+            <label>Name</label>
+            <input type="text" id="propose-amenity-name" placeholder="e.g. Rooftop Terrace" maxlength="60">
+        </div>
+        <div class="tf-field">
+            <label>Icon (optional emoji)</label>
+            <input type="text" id="propose-amenity-icon" placeholder="🏙️" maxlength="4">
+        </div>
+        <div class="tf-modal-actions">
+            <button type="button" class="tf-btn tf-btn-ghost" data-close-modal="propose-amenity-modal">Cancel</button>
+            <button type="button" class="tf-btn tf-btn-primary" id="propose-amenity-submit">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Add event modal ── -->
+<div class="tf-modal-overlay" id="add-event-modal">
+    <div class="tf-modal">
+        <h3>Add an event</h3>
+        <div class="tf-modal-sub">Share a regular or one-off event happening at {{ pub.name }}.</div>
+        <div class="tf-field">
+            <label>Type</label>
+            <select id="event-type-select">
+                {% for et in event_types %}
+                <option value="{{ et.slug }}">{{ et.icon }} {{ et.name }}</option>
+                {% endfor %}
+                <option value="__new__">+ Suggest new type…</option>
+            </select>
+        </div>
+        <div class="tf-field" id="new-event-type-wrap" style="display:none;">
+            <label>New type name</label>
+            <input type="text" id="new-event-type-name" placeholder="e.g. Chess Club" maxlength="60">
+            <input type="text" id="new-event-type-icon" placeholder="Icon (optional) ♟️" maxlength="4" style="margin-top:6px;">
+        </div>
+        <div class="tf-field">
+            <label>Title (optional)</label>
+            <input type="text" id="event-title" placeholder="Weekly quiz night" maxlength="200">
+        </div>
+        <div class="tf-field">
+            <label>Starts at</label>
+            <input type="datetime-local" id="event-starts-at">
+        </div>
+        <div class="tf-field">
+            <label>Recurrence</label>
+            <select id="event-recurrence">
+                <option value="none">One-off</option>
+                <option value="weekly">Weekly</option>
+                <option value="fortnightly">Fortnightly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+        </div>
+        <div class="tf-field">
+            <label>Description (optional)</label>
+            <textarea id="event-description" maxlength="500" placeholder="Teams of 4, £2 entry, starts 8pm"></textarea>
+        </div>
+        <div class="tf-modal-actions">
+            <button type="button" class="tf-btn tf-btn-ghost" data-close-modal="add-event-modal">Cancel</button>
+            <button type="button" class="tf-btn tf-btn-primary" id="add-event-submit">Add event</button>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -437,6 +739,145 @@ document.getElementById('map-btn').addEventListener('click', () => {
 function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// ── Amenities + events shared helpers ────────────────────────────────────────
+const PUB_ID = {{ pub.id }};
+
+function getCookie(name) {
+    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+}
+
+async function tfPost(url, body) {
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify(body || {}),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || res.statusText);
+    return res.json();
+}
+
+// ── Amenity voting ───────────────────────────────────────────────────────────
+{% if user.is_authenticated %}
+document.querySelectorAll('.amenity-chip').forEach(chip => {
+    const slug = chip.dataset.slug;
+    chip.querySelectorAll('.amenity-vote-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const voteNow = btn.dataset.vote;
+            const alreadyActive = btn.classList.contains('voted-' + voteNow);
+            const sendVote = alreadyActive ? 'clear' : voteNow;
+            try {
+                const data = await tfPost(`/map/api/pubs/${PUB_ID}/amenities/vote/`, {slug, vote: sendVote});
+                chip.querySelector('[data-yes]').textContent = data.yes_count;
+                chip.querySelector('[data-no]').textContent = data.no_count;
+                chip.querySelectorAll('.amenity-vote-btn').forEach(b => {
+                    b.classList.remove('voted-yes', 'voted-no');
+                });
+                if (data.user_vote === true)  chip.querySelector('.vote-yes').classList.add('voted-yes');
+                if (data.user_vote === false) chip.querySelector('.vote-no').classList.add('voted-no');
+                // Refresh status class
+                chip.classList.remove('status-unknown','status-confirmed','status-contested','status-denied');
+                let status = 'unknown';
+                if (data.yes_count || data.no_count) {
+                    if (data.yes_count > data.no_count)      status = 'confirmed';
+                    else if (data.no_count > data.yes_count) status = 'denied';
+                    else                                     status = 'contested';
+                }
+                chip.classList.add('status-' + status);
+            } catch (err) { alert(err.message || 'Vote failed'); }
+        });
+    });
+});
+
+// ── Modals ──────────────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('visible'); }
+function closeModal(id) { document.getElementById(id).classList.remove('visible'); }
+
+document.querySelectorAll('[data-close-modal]').forEach(btn => {
+    btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+});
+document.querySelectorAll('.tf-modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('visible');
+    });
+});
+
+// ── Propose amenity ─────────────────────────────────────────────────────────
+const proposeBtn = document.getElementById('propose-amenity-btn');
+if (proposeBtn) {
+    proposeBtn.addEventListener('click', () => openModal('propose-amenity-modal'));
+    document.getElementById('propose-amenity-submit').addEventListener('click', async () => {
+        const name = document.getElementById('propose-amenity-name').value.trim();
+        const icon = document.getElementById('propose-amenity-icon').value.trim();
+        if (!name) return;
+        try {
+            const data = await tfPost('/map/api/amenities/propose/', {name, icon});
+            closeModal('propose-amenity-modal');
+            document.getElementById('propose-amenity-name').value = '';
+            document.getElementById('propose-amenity-icon').value = '';
+            if (data.is_approved) {
+                location.reload();
+            } else {
+                alert('Thanks — your suggestion is pending review and will appear after approval.');
+            }
+        } catch (err) { alert(err.message || 'Submit failed'); }
+    });
+}
+
+// ── Add event ───────────────────────────────────────────────────────────────
+const addEventBtn = document.getElementById('add-event-btn');
+if (addEventBtn) {
+    addEventBtn.addEventListener('click', () => openModal('add-event-modal'));
+
+    const typeSelect = document.getElementById('event-type-select');
+    const newTypeWrap = document.getElementById('new-event-type-wrap');
+    typeSelect.addEventListener('change', () => {
+        newTypeWrap.style.display = typeSelect.value === '__new__' ? '' : 'none';
+    });
+
+    document.getElementById('add-event-submit').addEventListener('click', async () => {
+        const startsAt = document.getElementById('event-starts-at').value;
+        if (!startsAt) { alert('Please pick a start time'); return; }
+        let slug = typeSelect.value;
+
+        try {
+            if (slug === '__new__') {
+                const newName = document.getElementById('new-event-type-name').value.trim();
+                const newIcon = document.getElementById('new-event-type-icon').value.trim();
+                if (!newName) { alert('Enter a name for the new type'); return; }
+                const created = await tfPost('/map/api/event-types/propose/', {name: newName, icon: newIcon});
+                if (!created.is_approved) {
+                    alert('New event type submitted for review — you can add the event once it\'s approved.');
+                    return;
+                }
+                slug = created.slug;
+            }
+
+            await tfPost(`/map/api/pubs/${PUB_ID}/events/create/`, {
+                event_type: slug,
+                title: document.getElementById('event-title').value.trim(),
+                starts_at: startsAt,
+                recurrence: document.getElementById('event-recurrence').value,
+                description: document.getElementById('event-description').value.trim(),
+            });
+            location.reload();
+        } catch (err) { alert(err.message || 'Create failed'); }
+    });
+}
+
+// ── Delete event ────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-delete-event]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        if (!confirm('Delete this event?')) return;
+        try {
+            await tfPost(`/map/api/events/${btn.dataset.deleteEvent}/delete/`, {});
+            const card = btn.closest('.event-card');
+            card && card.remove();
+        } catch (err) { alert(err.message || 'Delete failed'); }
+    });
+});
+{% endif %}
 </script>
 
 {% endblock %}
